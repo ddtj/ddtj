@@ -48,7 +48,7 @@ class MonitoredSessionTests {
         Mockito.when(referenceType.name()).thenReturn(DECLARING_CLASS);
         Mockito.when(method.declaringType()).thenReturn(referenceType);
         Mockito.when(method.signature()).thenReturn(METHOD_SIGNATURE);
-        
-        Assertions.assertTrue(session.enteringMethod(method) == session.enteringMethod(method));
+
+        Assertions.assertSame(session.enteringMethod(method), session.enteringMethod(method));
     }
 }

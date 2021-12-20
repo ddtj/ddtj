@@ -41,3 +41,13 @@ jobs:
           cd ../Backend
           mvn package
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ddtj_ddtj
+      - name: Upload Backend Artifacts
+      - uses: actions/upload-artifact@v2
+        with:
+          name: backend.jar
+          path: Backend/target/Backend*.jar
+      - name: Upload CLI Artifacts
+      - uses: actions/upload-artifact@v2
+        with:
+          name: cli.jar
+          path: CLI/target/*.jar

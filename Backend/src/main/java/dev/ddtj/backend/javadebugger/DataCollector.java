@@ -45,26 +45,8 @@ public class DataCollector {
             EventSet eventSet = session.getVirtualMachine().eventQueue().remove(100);
             while (eventSet != null) {
                 for (Event event : eventSet) {
-                    if(event instanceof VMDeathEvent) {
+                    if (processEvent(session, event)) {
                         return;
-                    }
-                    if(event instanceof MethodEntryEvent) {
-                        MethodEntryEvent methodEntryEvent = (MethodEntryEvent) event;
-
-                        ParentMethod parent = session.enteringMethod(methodEntryEvent.method());
-                        Invocation invocation = new Invocation();
-                        invocation.setTime(System.currentTimeMillis());
-                        /*try {
-                            invocation.setArguments(methodEntryEvent.thread().frame(0).getArgumentValues()
-                                    .stream().map(arg -> arg.).collect(Collectors.toList()).toArray());
-                        } catch (IncompatibleThreadStateException e) {
-                            invocation.setArguments(new Object[0]);
-                        }*/
-
-                        StepRequest stepRequest = event.virtualMachine().eventRequestManager().createStepRequest(
-                                methodEntryEvent.thread(), StepRequest.STEP_LINE, StepRequest.STEP_OVER);
-                        stepRequest.putProperty(METHOD_PARENT_KEY, parent);
-                        stepRequest.enable();
                     }
                 }
                 session.getVirtualMachine().resume();
@@ -76,5 +58,30 @@ public class DataCollector {
             // Restore interrupted state...
             Thread.currentThread().interrupt();
         }
+    }
+
+    public boolean processEvent(MonitoredSession session, Event event) {
+        if(event instanceof VMDeathEvent) {
+            return true;
+        }
+        if(event instanceof MethodEntryEvent) {
+            MethodEntryEvent methodEntryEvent = (MethodEntryEvent) event;
+
+            ParentMethod parent = session.enteringMethod(methodEntryEvent.method());
+            Invocation invocation = new Invocation();
+            invocation.setTime(System.currentTimeMillis());
+            /*try {
+                invocation.setArguments(methodEntryEvent.thread().frame(0).getArgumentValues()
+                        .stream().map(arg -> arg.).collect(Collectors.toList()).toArray());
+            } catch (IncompatibleThreadStateException e) {
+                invocation.setArguments(new Object[0]);
+            }
+
+            StepRequest stepRequest = event.virtualMachine().eventRequestManager().createStepRequest(
+                    methodEntryEvent.thread(), StepRequest.STEP_LINE, StepRequest.STEP_OVER);
+            stepRequest.putProperty(METHOD_PARENT_KEY, parent);
+            stepRequest.enable();*/
+        }
+        return false;
     }
 }
