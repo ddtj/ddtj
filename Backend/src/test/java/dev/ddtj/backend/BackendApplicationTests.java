@@ -42,13 +42,14 @@ class BackendApplicationTests {
 
 	@Test
 	void testConnectSessionCreate() throws Exception {
-		MonitoredSession monitoredSession = connectSession.create(null,
-				null, HelloWorld.class.getName(), null);
+		MonitoredSession monitoredSession = connectSession.create(System.getProperty("java.home"),
+				"-Dhello=true", HelloWorld.class.getName(), "*");
 
 		EventSet eventSet = monitoredSession.getVirtualMachine().eventQueue().remove(100);
 		Assertions.assertThat(eventSet).isNotNull();
 
 		Mockito.verify(dataCollector, Mockito.times(1))
 				.collect(monitoredSession);
+
 	}
 }
