@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import dev.ddtj.backend.data.ParentClass;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import lombok.extern.java.Log;
 
@@ -71,8 +72,7 @@ public class MonitoredSession {
                 }).collect(Collectors.toList()).toArray(parameters);
                 parentMethod.setParameters(parameters);
             } catch (AbsentInformationException e) {
-                log.warning("Could not get arguments for method " + methodSignature + ": " + e);
-                e.printStackTrace();
+                log.log(Level.WARNING, "Could not get arguments for method " + methodSignature, e);
             }
         }
         return parentMethod;

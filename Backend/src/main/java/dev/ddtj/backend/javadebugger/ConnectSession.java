@@ -46,7 +46,7 @@ public class ConnectSession {
             if(vmHome != null && !vmHome.isBlank()) {
                 env.get("home").setValue(vmHome);
             }
-            if(vmOptions != null && !vmHome.isBlank()) {
+            if(vmOptions != null && !vmOptions.isBlank()) {
                 env.get("options").setValue(vmOptions);
             }
             VirtualMachine vm = connector.launch(env);

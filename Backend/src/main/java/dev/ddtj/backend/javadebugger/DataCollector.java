@@ -27,6 +27,7 @@ import com.sun.jdi.event.VMDeathEvent;
 import com.sun.jdi.request.StepRequest;
 import dev.ddtj.backend.data.Invocation;
 import dev.ddtj.backend.data.ParentMethod;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import lombok.extern.java.Log;
 import org.springframework.scheduling.annotation.Async;
@@ -70,8 +71,10 @@ public class DataCollector {
                 eventSet = session.getVirtualMachine().eventQueue().remove(100);
             }
         } catch (InterruptedException e) {
-            log.severe("Interrupted while waiting for event queue: " + e);
-            e.printStackTrace();
+            log.log(Level.SEVERE,"Interrupted while waiting for event queue", e);
+
+            // Restore interrupted state...
+            Thread.currentThread().interrupt();
         }
     }
 }
