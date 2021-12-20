@@ -41,10 +41,6 @@ class BackendApplicationTests {
 	private ConnectSession connectSession;
 
 	@Test
-	void contextLoads() {
-	}
-
-	@Test
 	void testConnectSessionCreate() throws Exception {
 		MonitoredSession monitoredSession = connectSession.create(null,
 				null, HelloWorld.class.getName(), null);

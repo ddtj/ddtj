@@ -20,19 +20,20 @@ package dev.ddtj.backend;
 import dev.ddtj.backend.javadebugger.ConnectSession;
 import dev.ddtj.backend.javadebugger.MonitoredSession;
 import dev.ddtj.backend.testdata.PrimeMain;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-public class DebugPrimeMainTests {
+class DebugPrimeMainTests {
     @Autowired
     private ConnectSession connectSession;
 
     @Test
-    public void testDebugPrimeMain() throws Exception {
+    void testDebugPrimeMain() throws Exception {
         MonitoredSession monitoredSession = connectSession.create(null,
                 null, PrimeMain.class.getName(), null);
-
+        Assertions.assertNotNull(monitoredSession);
     }
 }

@@ -23,6 +23,7 @@ import com.sun.jdi.connect.Connector.Argument;
 import com.sun.jdi.connect.IllegalConnectorArgumentsException;
 import com.sun.jdi.connect.LaunchingConnector;
 import com.sun.jdi.connect.VMStartException;
+import com.sun.jdi.request.EventRequest;
 import com.sun.jdi.request.MethodEntryRequest;
 import java.io.IOException;
 import java.util.Map;
@@ -56,7 +57,7 @@ public class ConnectSession {
             }
             MethodEntryRequest methodEntryRequest = vm.eventRequestManager().createMethodEntryRequest();
             methodEntryRequest.addClassFilter(filter);
-            methodEntryRequest.setSuspendPolicy(MethodEntryRequest.SUSPEND_EVENT_THREAD);
+            methodEntryRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
             methodEntryRequest.enable();
             MonitoredSession session = new MonitoredSession(vm, filter);
             collector.collect(session);
