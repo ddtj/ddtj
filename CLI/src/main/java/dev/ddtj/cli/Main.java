@@ -18,4 +18,5 @@
 package dev.ddtj.cli;
 
 public class Main {
+    
 }
