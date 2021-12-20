@@ -33,4 +33,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ddtj_ddtj
+        run: |
+          cd Common
+          mvn install
+          cd ../CLI
+          mvn package
+          cd ../Backend
+          mvn package
+          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ddtj_ddtj
+      - name: Upload Backend Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: backend.jar
+          path: Backend/target/Backend*.jar
+      - name: Upload CLI Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: cli.jar
+          path: CLI/target/*.jar
