@@ -36,5 +36,5 @@ jobs:
         run: |
           cd Common
           mvn install
-          cd Backend
+          cd ../Backend
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ddtj_ddtj
