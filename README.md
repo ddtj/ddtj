@@ -1,5 +1,8 @@
 # DDTJ: It kills bugs
 
+[![No Known Vulnerabilities](https://snyk.io/test/github/ddtj/ddtj/badge.svg)](https://snyk.io/test/github/ddtj/ddtj)
+
+
 DDT is the flip side of TDD (Test-driven development). It stands for "Development Driven Tests". Notice that it doesn’t contradict or replace test-driven development, in fact, it’s a perfect complement to it. But let’s start by defining DDT and how it improves production code and code quality.
 
 DDT lets us generate test source code from a running application. 
