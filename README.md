@@ -127,6 +127,25 @@ class MyMethodTest {
 
 Notice that the mock objects are simplistic in this piece of code and already they encapsulate most of the method.
 
+## Working with the Sources
+You can follow the process in the actions script for building the project. Effectively we have three projects:
+* Common - common code, mostly data objects
+* CLI - command line tool
+* Backend - spring boot backend server
+
+To compile everything do:
+
+```bash
+cd Common
+mvn install
+cd ../CLI
+mvn package
+cd ../Backend
+mvn package
+```
+
+You can read about the process of building DDTJ in the following blog series: https://dev.to/codenameone/series/15971
+
 ## Future Enhancements
 An interesting use case is automatic test generation to increase code coverage. When running an application, we can detect code paths that weren't tested and generate unit tests to cover the writing tests gap. This would require integration with testing tools to detect current coverage information.
 
