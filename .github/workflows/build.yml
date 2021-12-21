@@ -5,8 +5,12 @@ on:
       - master
   pull_request:
     types: [opened, synchronize, reopened]
-  schedule:
-    - cron: '37 6 * * 6'
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
 jobs:
   build:
     name: Build
