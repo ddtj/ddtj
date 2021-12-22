@@ -25,6 +25,7 @@ import com.sun.jdi.connect.LaunchingConnector;
 import com.sun.jdi.connect.VMStartException;
 import com.sun.jdi.request.EventRequest;
 import com.sun.jdi.request.MethodEntryRequest;
+import dev.ddtj.backend.dto.VMDTO;
 import java.io.IOException;
 import java.util.Map;
 import lombok.extern.java.Log;
@@ -39,31 +40,31 @@ public class ConnectSession {
         this.collector = collector;
     }
 
-    public MonitoredSession create(String vmHome, String vmOptions, String main, String filter) throws IOException {
+    public MonitoredSession create(VMDTO vmdto) throws IOException {
         try {
             LaunchingConnector connector = Bootstrap.virtualMachineManager().defaultConnector();
             Map<String, Argument> env = connector.defaultArguments();
-            env.get("main").setValue(main);
-            if(vmHome != null && !vmHome.isBlank()) {
-                env.get("home").setValue(vmHome);
+            env.get("main").setValue(vmdto.getMain());
+            if(vmdto.getVmHome() != null && !vmdto.getVmHome().isBlank()) {
+                env.get("home").setValue(vmdto.getVmHome());
             }
-            if(vmOptions != null && !vmOptions.isBlank()) {
-                env.get("options").setValue(vmOptions);
+            if(vmdto.getVmOptions() != null && !vmdto.getVmOptions().isBlank()) {
+                env.get("options").setValue(vmdto.getVmOptions());
             }
             VirtualMachine vm = connector.launch(env);
 
-            if(filter == null || filter.isBlank()) {
-                filter = main.substring(main.lastIndexOf('.') + 1) + "*";
+            if(vmdto.getFilter() == null || vmdto.getFilter().isBlank()) {
+                vmdto.setFilter(vmdto.getMain().substring(vmdto.getMain().lastIndexOf('.') + 1) + "*");
             }
             MethodEntryRequest methodEntryRequest = vm.eventRequestManager().createMethodEntryRequest();
-            methodEntryRequest.addClassFilter(filter);
+            methodEntryRequest.addClassFilter(vmdto.getFilter());
             methodEntryRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
             methodEntryRequest.enable();
-            MonitoredSession session = new MonitoredSession(vm, filter);
+            MonitoredSession session = new MonitoredSession(vm, vmdto.getFilter());
             collector.collect(session);
             return session;
         } catch (IllegalConnectorArgumentsException | VMStartException e) {
-            log.severe("Failed to connect to " + main + ": " + e);
+            log.severe("Failed to connect to " + vmdto.getMain() + ": " + e);
             throw new IOException(e);
         }
     }

@@ -15,16 +15,12 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dev.ddtj.backend.data;
+package dev.ddtj.backend.dto;
 
-import java.util.List;
 import lombok.Data;
 
 @Data
-public class Invocation {
+public class TestTimeDTO {
     private long time;
-    private Object[] arguments;
-    private Object result;
-    private List<MockInvocation> mockInvocations;
-    private String thrownException;
+    private String id;
 }

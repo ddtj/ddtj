@@ -23,6 +23,7 @@ import com.sun.jdi.Method;
 import com.sun.jdi.VirtualMachine;
 import dev.ddtj.backend.data.MethodParameter;
 import dev.ddtj.backend.data.ParentMethod;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +104,18 @@ public class MonitoredSession {
             parentMethod = createMethod(methodSignature, method);
             parentClass.addMethod(parentMethod);
             return parentMethod;
+        }
+    }
+
+    public Collection<ParentClass> listClasses() {
+        synchronized (LOCK) {
+            return parentClassMap.values();
+        }
+    }
+
+    public ParentClass getClass(String className) {
+        synchronized (LOCK) {
+            return parentClassMap.get(className);
         }
     }
 }

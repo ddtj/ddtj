@@ -41,9 +41,7 @@ public class ParentMethod {
         return invocations.size();
     }
 
-    public synchronized Invocation[] getInvocations() {
-        Invocation[] invocationsArray = new Invocation[invocations.size()];
-        invocations.toArray(invocationsArray);
-        return invocationsArray;
+    public synchronized List<Invocation> listInvocations() {
+        return new ArrayList<>(invocations.size());
     }
 }

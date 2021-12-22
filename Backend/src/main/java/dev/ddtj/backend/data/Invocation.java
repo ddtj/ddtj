@@ -15,26 +15,17 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dev.ddtj.backend;
+package dev.ddtj.backend.data;
 
-import dev.ddtj.backend.javadebugger.ConnectSession;
-import dev.ddtj.backend.javadebugger.MonitoredSession;
-import dev.ddtj.backend.dto.VMDTO;
-import dev.ddtj.backend.testdata.PrimeMain;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import java.util.List;
+import lombok.Data;
 
-@SpringBootTest
-class DebugPrimeMainTests {
-    @Autowired
-    private ConnectSession connectSession;
-
-    @Test
-    void testDebugPrimeMain() throws Exception {
-        MonitoredSession monitoredSession = connectSession.create(new VMDTO(null,
-                null, PrimeMain.class.getName(), null));
-        Assertions.assertNotNull(monitoredSession);
-    }
+@Data
+public class Invocation {
+    private String id;
+    private long time;
+    private Object[] arguments;
+    private Object result;
+    private List<MockInvocation> mockInvocations;
+    private String thrownException;
 }

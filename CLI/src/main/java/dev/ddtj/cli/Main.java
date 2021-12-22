@@ -17,8 +17,85 @@
  */
 package dev.ddtj.cli;
 
-public class Main {
-    public static void main(String[] argv) {
-        System.out.println("Hello World!");
+import com.google.gson.Gson;
+import dev.ddtj.backend.dto.VMDTO;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+
+@Command(name = "ddtj", mixinStandardHelpOptions = true, version = "0.0.3",
+        description = "DDT: It kills bugs", helpCommand = true,
+        abbreviateSynopsis = true)
+public class Main implements Callable<Integer> {
+    private static CommandLine cmd;
+
+    @Option(names = {"-port", "-p"}, description = "The backend server port number (defaults to 2012)")
+    private int backendPort = 2012;
+
+    @Option(names = {"-javahome", "-j"}, description = "Location of the Java virtual machine")
+    private String javaHome;
+
+    @Option(names = {"-whitelist", "-w"}, description = "Whitelisted packages regular expression (must contain star at start or end)")
+    private String whitelist;
+
+    @Option(names = {"-run", "-r"}, description = "Run an application with DDTJ backend")
+    private String run;
+
+    @Option(names = {"-list-classes", "-c"}, description = "Display a list of all the classes that were reached")
+    private boolean listClasses;
+
+    @Option(names = {"-list-methods", "-m"}, description = "Display a list of methods in the class that were reached")
+    private String listMethods;
+
+    @Option(names = {"-list-tests", "-t"}, description = "Display a list of tests in the class.method that were reached")
+    private String listTests;
+
+    @Option(names = {"-generate-test", "-g"}, description = "Generate the test for the given test id")
+    private String generate;
+
+    @Option(names = {"-classpath", "-cp"}, hidden = true)
+    private String classpath;
+
+    @Option(names = {"-jar"}, hidden = true)
+    private String jar;
+
+    @Override
+    public Integer call() throws Exception {
+        String baseUrl = "http://localhost:" + backendPort;
+        if(run != null && !run.isBlank()) {
+            String arg = "";
+            if(classpath != null && !classpath.isEmpty()) {
+                arg += "-cp " + classpath;
+            }
+            if(jar != null && !jar.isEmpty()) {
+                arg += " -jar " + jar;
+            }
+            VMDTO vm = new VMDTO(javaHome, arg, run, whitelist);
+            String inputJson = new Gson().toJson(vm);
+            HttpRequest request = HttpRequest.newBuilder(URI.create(baseUrl + "/connect"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(inputJson)).build();
+
+            HttpClient client = HttpClient.newHttpClient();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 200 ? 0 : response.statusCode();
+        }
+
+        cmd.usage(System.err);
+        return 1;
+    }
+
+    public static void main(String[] args) {
+        cmd = new CommandLine(new Main());
+        int exitCode = cmd.execute(args);
+        System.exit(exitCode);
     }
 }
