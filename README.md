@@ -48,7 +48,7 @@ java -jar backend.jar
 Then run your application with the `ddtj.jar` as such:
 
 ```bash
-java -jar ddtj.jar -run [-javahome:<path-to-java-home] [-whitelist:regex-whitelist classes] [-arg=<app argument>...] mainClass
+java -jar ddtj.jar -run mainClass [-javahome:<path-to-java-home] [-whitelist:regex-whitelist classes] [-classpath...] [-jar...] 
 ```
 
 Once you have enough usage of your app worthy of testing, you can start using the CLI to generate tests:

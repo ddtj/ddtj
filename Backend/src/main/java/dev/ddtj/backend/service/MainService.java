@@ -49,6 +49,14 @@ public class MainService {
         session = connectSession.create(vmDTO);
     }
 
+    /**
+     * This is a bit of a hack for the unit tests
+     * @deprecated this is for internal unit tests only
+     */
+    public void setSession(MonitoredSession session) {
+        this.session = session;
+    }
+
     public List<ClassDTO> listClasses() {
         return session.listClasses().stream().map(parentClass -> {
             ClassDTO classDTO = new ClassDTO();
@@ -73,7 +81,7 @@ public class MainService {
 
     }
 
-    public List<TestTimeDTO> listMethods(String className, String methodSignature) {
+    public List<TestTimeDTO> listInvocations(String className, String methodSignature) {
         ParentClass parentClass = session.getClass(className);
         ParentMethod method = parentClass.findMethod(methodSignature);
         return method.listInvocations().stream().map(invocation -> {
