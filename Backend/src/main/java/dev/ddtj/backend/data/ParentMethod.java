@@ -17,9 +17,31 @@
  */
 package dev.ddtj.backend.data;
 
-public class MockInvocation {
-  private ParentClass parentClass;
-  private ParentMethod parentMethod;
-  private Object[] arguments;
-  private Object returnValue;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
+@Data
+public class ParentMethod {
+    private String signature;
+    private MethodParameter[] parameters;
+
+    @Setter(AccessLevel.PACKAGE)
+    @Getter(AccessLevel.PACKAGE)
+    private List<Invocation> invocations = new ArrayList<>();
+
+    public synchronized void addInvocation(Invocation invocation) {
+        invocations.add(invocation);
+    }
+
+    public synchronized int getInvocationCount() {
+        return invocations.size();
+    }
+
+    public synchronized List<Invocation> listInvocations() {
+        return new ArrayList<>(invocations.size());
+    }
 }

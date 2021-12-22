@@ -21,6 +21,7 @@ import com.sun.jdi.event.EventSet;
 import dev.ddtj.backend.javadebugger.DataCollector;
 import dev.ddtj.backend.javadebugger.ConnectSession;
 import dev.ddtj.backend.javadebugger.MonitoredSession;
+import dev.ddtj.backend.dto.VMDTO;
 import dev.ddtj.backend.testdata.HelloWorld;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -42,8 +43,8 @@ class BackendApplicationTests {
 
 	@Test
 	void testConnectSessionCreate() throws Exception {
-		MonitoredSession monitoredSession = connectSession.create(System.getProperty("java.home"),
-				"-Dhello=true", HelloWorld.class.getName(), "*");
+		MonitoredSession monitoredSession = connectSession.create(new VMDTO(System.getProperty("java.home"),
+				"-Dhello=true", HelloWorld.class.getName(), "*"));
 
 		EventSet eventSet = monitoredSession.getVirtualMachine().eventQueue().remove(100);
 		Assertions.assertThat(eventSet).isNotNull();

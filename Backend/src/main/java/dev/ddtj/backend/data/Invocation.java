@@ -22,6 +22,7 @@ import lombok.Data;
 
 @Data
 public class Invocation {
+    private String id;
     private long time;
     private Object[] arguments;
     private Object result;

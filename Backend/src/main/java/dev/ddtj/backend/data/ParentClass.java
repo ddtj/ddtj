@@ -17,7 +17,9 @@
  */
 package dev.ddtj.backend.data;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import lombok.AccessLevel;
@@ -33,8 +35,20 @@ public class ParentClass {
     @Getter(AccessLevel.PACKAGE)
     private Set<ParentMethod> methods = new TreeSet<>(Comparator.comparing(ParentMethod::getSignature));
 
+    public synchronized List<ParentMethod> listMethods() {
+        return new ArrayList<>(methods);
+    }
+
     public synchronized void addMethod(ParentMethod method) {
         methods.add(method);
+    }
+
+    public synchronized int countTotalExecutions() {
+        return methods.stream().mapToInt(ParentMethod::getInvocationCount).sum();
+    }
+
+    public synchronized int getMethodCount() {
+        return methods.size();
     }
 
     public synchronized ParentMethod findMethod(String signature) {

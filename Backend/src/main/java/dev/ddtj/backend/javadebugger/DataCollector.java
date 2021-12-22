@@ -20,6 +20,7 @@ package dev.ddtj.backend.javadebugger;
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.IncompatibleThreadStateException;
 import com.sun.jdi.Method;
+import com.sun.jdi.Value;
 import com.sun.jdi.event.Event;
 import com.sun.jdi.event.EventSet;
 import com.sun.jdi.event.MethodEntryEvent;
@@ -27,6 +28,7 @@ import com.sun.jdi.event.VMDeathEvent;
 import com.sun.jdi.request.StepRequest;
 import dev.ddtj.backend.data.Invocation;
 import dev.ddtj.backend.data.ParentMethod;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import lombok.extern.java.Log;
@@ -71,8 +73,9 @@ public class DataCollector {
             Invocation invocation = new Invocation();
             invocation.setTime(System.currentTimeMillis());
             /*try {
-                invocation.setArguments(methodEntryEvent.thread().frame(0).getArgumentValues()
-                        .stream().map(arg -> arg.).collect(Collectors.toList()).toArray());
+                List<Value> valueList = methodEntryEvent.thread().frame(0).getArgumentValues(); // invocation.setArguments()
+                log.fine("Value list: " + valueList);
+                //        .stream().map(arg -> arg.).collect(Collectors.toList()).toArray());
             } catch (IncompatibleThreadStateException e) {
                 invocation.setArguments(new Object[0]);
             }

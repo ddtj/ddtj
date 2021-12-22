@@ -1,6 +1,6 @@
 # DDTJ: It kills bugs
 
-[![Build](https://github.com/ddtj/ddtj/actions/workflows/build.yml/badge.svg)](https://github.com/ddtj/ddtj/actions/workflows/build.yml) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ddtj_ddtj&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ddtj_ddtj)  [![No Known Vulnerabilities](https://snyk.io/test/github/ddtj/ddtj/badge.svg)](https://snyk.io/test/github/ddtj/ddtj)
+[![Build](https://github.com/ddtj/ddtj/actions/workflows/build.yml/badge.svg)](https://github.com/ddtj/ddtj/actions/workflows/build.yml) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ddtj_ddtj&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ddtj_ddtj)  
 
 
 DDT is the flip side of TDD (Test-driven development). It stands for "Development Driven Tests". Notice that it doesn’t contradict or replace test-driven development, in fact, it’s a perfect complement to it. But let’s start by defining DDT and how it improves production code and code quality.
@@ -48,7 +48,7 @@ java -jar backend.jar
 Then run your application with the `ddtj.jar` as such:
 
 ```bash
-java -jar ddtj.jar -run [-javahome:<path-to-java-home] [-whitelist:regex-whitelist classes] [-arg=<app argument>...] mainClass
+java -jar ddtj.jar -run mainClass [-javahome:<path-to-java-home] [-whitelist:regex-whitelist classes] [-classpath...] [-jar...] 
 ```
 
 Once you have enough usage of your app worthy of testing, you can start using the CLI to generate tests:
