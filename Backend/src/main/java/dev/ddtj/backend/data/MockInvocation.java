@@ -17,6 +17,9 @@
  */
 package dev.ddtj.backend.data;
 
+import lombok.Data;
+
+@Data
 public class MockInvocation {
   private ParentClass parentClass;
   private ParentMethod parentMethod;

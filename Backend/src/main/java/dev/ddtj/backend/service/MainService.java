@@ -53,6 +53,7 @@ public class MainService {
      * This is a bit of a hack for the unit tests
      * @deprecated this is for internal unit tests only
      */
+    @Deprecated
     public void setSession(MonitoredSession session) {
         this.session = session;
     }

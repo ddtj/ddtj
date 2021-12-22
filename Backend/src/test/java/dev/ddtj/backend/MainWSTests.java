@@ -10,10 +10,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class MainWSTests {
+class MainWSTests {
     @Mock
     private MainService mainService;
 
@@ -23,25 +22,25 @@ public class MainWSTests {
     private final VMDTO vmDTO = new VMDTO();
 
     @Test
-    public void testConnectTest() throws IOException {
+    void testConnectTest() throws IOException {
         mainWS.connect(vmDTO);
         Mockito.verify(mainService).connect(vmDTO);
     }
 
     @Test
-    public void listClassesTest() {
+    void listClassesTest() {
         mainWS.listClasses();
         Mockito.verify(mainService).listClasses();
     }
 
     @Test
-    public void listMethods() {
+    void listMethods() {
         mainWS.listMethods(getClass().getName());
         Mockito.verify(mainService).listMethods(getClass().getName());
     }
 
     @Test
-    public void listInvocations() {
+    void listInvocations() {
         mainWS.listInvocations(getClass().getName(), "sig");
         Mockito.verify(mainService).listInvocations(getClass().getName(), "sig");
     }

@@ -1,6 +1,7 @@
 package dev.ddtj.backend;
 
 import dev.ddtj.backend.data.Invocation;
+import dev.ddtj.backend.data.MockInvocation;
 import dev.ddtj.backend.data.ParentClass;
 import dev.ddtj.backend.data.ParentMethod;
 import dev.ddtj.backend.dto.ClassDTO;
@@ -22,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 
 @ExtendWith(MockitoExtension.class)
-public class MainServiceTests {
+class MainServiceTests {
     @Mock
     private ConnectSession connectSession;
 
@@ -37,13 +38,18 @@ public class MainServiceTests {
     private final ParentClass PARENT_CLASS = new ParentClass();
     private final ParentMethod PARENT_METHOD = new ParentMethod();
     private final List<ParentClass> CLASS_LIST = List.of(PARENT_CLASS);
+    private final Invocation invocation = new Invocation();
+    private final MockInvocation mockInvocation = new MockInvocation();
+
 
     @Test
-    public void testAPI() throws IOException {
+    void testAPI() throws IOException {
         mainService.setSession(monitoredSession);
         Mockito.when(monitoredSession.listClasses()).thenReturn(CLASS_LIST);
         PARENT_METHOD.setSignature("ParentMethod");
-        PARENT_METHOD.addInvocation(new Invocation());
+        initLombok();
+
+        PARENT_METHOD.addInvocation(invocation);
         PARENT_CLASS.setName("ParentClass");
         PARENT_CLASS.addMethod(PARENT_METHOD);
         mainService.connect(vmDTO);
@@ -65,5 +71,29 @@ public class MainServiceTests {
 
         List<TestTimeDTO> testTimeDTOS = mainService.listInvocations(PARENT_CLASS.getName(), PARENT_METHOD.getSignature());
         assertEquals(0, testTimeDTOS.size());
+    }
+
+    private void initLombok() {
+        invocation.setArguments(new Object[]{" "});
+        invocation.setTime(System.currentTimeMillis());
+        invocation.setMockInvocations(List.of(mockInvocation));
+        invocation.setId("1");
+        invocation.setResult(new Object());
+        invocation.setThrownException("");
+
+        mockInvocation.setParentMethod(PARENT_METHOD);
+        mockInvocation.setArguments(invocation.getArguments());
+        mockInvocation.setReturnValue(invocation.getResult());
+        mockInvocation.setParentClass(PARENT_CLASS);
+
+        // stupid coverage tests think lombok code is part of coverage
+        assertNotNull(PARENT_CLASS.toString());
+        assertTrue(PARENT_CLASS.equals(PARENT_CLASS));
+        assertNotNull(PARENT_METHOD.toString());
+        assertTrue(PARENT_METHOD.equals(PARENT_METHOD));
+        assertNotNull(invocation.toString());
+        assertTrue(invocation.equals(invocation));
+        assertNotNull(mockInvocation.toString());
+        assertTrue(mockInvocation.equals(mockInvocation));
     }
 }

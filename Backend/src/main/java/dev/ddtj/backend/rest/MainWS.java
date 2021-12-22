@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MainWS {
     private final MainService mainService;
 
-    public MainWS(ConnectSession connectSession, MainService mainService) {
+    public MainWS(MainService mainService) {
         this.mainService = mainService;
     }
 
