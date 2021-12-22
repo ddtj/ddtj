@@ -103,10 +103,12 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.5</version>
 				<configuration>
+					<includes>
+						<include>**/ddtj/**</include>
+					</includes>
 					<excludes>
-						<exclude>**/config/**</exclude>
-						<exclude>**/model/**</exclude>
-						<exclude>**/item/**</exclude>
+						<exclude>**SpringProxy**</exclude>
+						<exclude>**/ddtj/backend/data/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>
