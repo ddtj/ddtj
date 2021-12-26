@@ -15,37 +15,34 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dev.ddtj.backend.data;
+package dev.ddtj.backend.data.objectmodel;
 
-import dev.ddtj.backend.data.objectmodel.BaseType;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import com.sun.jdi.StringReference;
+import com.sun.jdi.Value;
 
-@Data
-public class ParentMethod {
-    private String signature;
-    private String name;
-    private BaseType[] parameters;
-    private BaseType returnValue;
-    private boolean applicable;
+/**
+ * Support for common builtin types to make their handling and code generation feel smoother
+ */
+public class BuiltinTypes extends BaseType {
+    private final BaseTypeInterface value;
+    private final ArrayCreation arrayCreation;
+    public static BuiltinTypes STRING = new BuiltinTypes(String.class.getName(), val -> ((StringReference)val).value(),
+            String[]::new);
 
-    @Setter(AccessLevel.PACKAGE)
-    @Getter(AccessLevel.PACKAGE)
-    private List<Invocation> invocations = new ArrayList<>();
 
-    public synchronized void addInvocation(Invocation invocation) {
-        invocations.add(invocation);
+    private BuiltinTypes(String type, BaseTypeInterface value, ArrayCreation arrayCreation) {
+        super(type);
+        this.value = value;
+        this.arrayCreation = arrayCreation;
     }
 
-    public synchronized int getInvocationCount() {
-        return invocations.size();
+    @Override
+    public Object getValue(Value value) {
+        return this.value.getValue(value);
     }
 
-    public synchronized List<Invocation> listInvocations() {
-        return new ArrayList<>(invocations.size());
+    @Override
+    public Object allocateArray(int size) {
+        return arrayCreation.allocateArray(size);
     }
 }

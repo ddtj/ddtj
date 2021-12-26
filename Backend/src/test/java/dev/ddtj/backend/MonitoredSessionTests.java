@@ -23,7 +23,6 @@ import com.sun.jdi.Method;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.VirtualMachine;
 import dev.ddtj.backend.javadebugger.MonitoredSession;
-import java.util.Arrays;
 import java.util.List;
 import lombok.extern.java.Log;
 import org.junit.jupiter.api.Assertions;
@@ -57,7 +56,7 @@ class MonitoredSessionTests {
         Mockito.when(method.arguments()).thenReturn(List.of(localVariable));
         Mockito.when(localVariable.name()).thenReturn("testArg");
         Mockito.when(localVariable.typeName()).thenReturn("int");
-        Assertions.assertSame(session.enteringMethod(method), session.enteringMethod(method));
+        Assertions.assertSame(session.getOrCreateMethod(method), session.getOrCreateMethod(method));
     }
 
     @Test()
@@ -65,7 +64,7 @@ class MonitoredSessionTests {
         MonitoredSession session = initSession();
         Mockito.when(method.arguments()).thenThrow(new AbsentInformationException());
         log.severe("There should be a stack trace for AbsentInformationException, this is valid and part of the test");
-        Assertions.assertSame(session.enteringMethod(method), session.enteringMethod(method));
+        Assertions.assertSame(session.getOrCreateMethod(method), session.getOrCreateMethod(method));
     }
 
     private MonitoredSession initSession() {

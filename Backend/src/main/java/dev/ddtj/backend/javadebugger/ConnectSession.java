@@ -57,7 +57,7 @@ public class ConnectSession {
                 vmdto.setFilter(vmdto.getMain().substring(vmdto.getMain().lastIndexOf('.') + 1) + "*");
             }
             MethodEntryRequest methodEntryRequest = vm.eventRequestManager().createMethodEntryRequest();
-            methodEntryRequest.addClassFilter(vmdto.getFilter());
+            //methodEntryRequest.addClassFilter(vmdto.getFilter());
             methodEntryRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
             methodEntryRequest.enable();
             MonitoredSession session = new MonitoredSession(vm, vmdto.getFilter());

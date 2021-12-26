@@ -17,19 +17,17 @@
  */
 package dev.ddtj.backend.javadebugger;
 
-import com.sun.jdi.AbsentInformationException;
-import com.sun.jdi.LocalVariable;
+import com.sun.jdi.ClassNotLoadedException;
 import com.sun.jdi.Method;
 import com.sun.jdi.VirtualMachine;
-import dev.ddtj.backend.data.MethodParameter;
 import dev.ddtj.backend.data.ParentMethod;
+import dev.ddtj.backend.data.objectmodel.BaseType;
+import dev.ddtj.backend.data.objectmodel.TypeFactory;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import dev.ddtj.backend.data.ParentClass;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 import lombok.extern.java.Log;
 
 @Log
@@ -38,6 +36,7 @@ public class MonitoredSession {
     private final VirtualMachine virtualMachine;
     private final String filter;
     private final Map<String, ParentClass> parentClassMap = new HashMap<>();
+    private String sessionId;
 
     public MonitoredSession(VirtualMachine virtualMachine, String filter) {
         this.virtualMachine = virtualMachine;
@@ -56,31 +55,23 @@ public class MonitoredSession {
     private ParentMethod createMethod(String methodSignature, Method method) {
         ParentMethod parentMethod = new ParentMethod();
         parentMethod.setSignature(methodSignature);
+        parentMethod.setName(method.name());
         if(method.isAbstract() || method.isNative() || method.isStaticInitializer()) {
-            parentMethod.setParameters(new MethodParameter[0]);
+            parentMethod.setParameters(new BaseType[0]);
         } else {
             try {
-                List<LocalVariable> arguments = method.arguments();
-                MethodParameter[] parameters = new MethodParameter[arguments.size()];
-
-                // slightly inefficient since we go through a list. Will need to revisit later but it's not a huge
-                // deal since it only happens on the first time a method is hit
-                arguments.stream().map(lv -> {
-                    MethodParameter parameter = new MethodParameter();
-                    parameter.setName(lv.name());
-                    parameter.setType(lv.typeName());
-                    return parameter;
-                }).collect(Collectors.toList()).toArray(parameters);
+                BaseType[] parameters = TypeFactory.create(method.argumentTypes());
                 parentMethod.setParameters(parameters);
-            } catch (AbsentInformationException e) {
-                log.log(Level.WARNING, "Could not get arguments for method " + methodSignature, e);
+                parentMethod.setReturnValue(TypeFactory.create(method.returnType()));
+            } catch (ClassNotLoadedException classNotLoadedException) {
+                log.log(Level.SEVERE, "Type in argument isn't loaded yet: " + method.argumentTypeNames(), classNotLoadedException);
             }
         }
         return parentMethod;
     }
 
 
-    public ParentMethod enteringMethod(Method method) {
+    public ParentMethod getOrCreateMethod(Method method) {
         String className = method.declaringType().name();
         String methodSignature = method.signature();
         ParentClass parentClass = null;
@@ -117,5 +108,16 @@ public class MonitoredSession {
         synchronized (LOCK) {
             return parentClassMap.get(className);
         }
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        if(this.sessionId != null) {
+            throw new IllegalStateException("Session id already set");
+        }
+        this.sessionId = sessionId;
     }
 }

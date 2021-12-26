@@ -17,35 +17,14 @@
  */
 package dev.ddtj.backend.data;
 
-import dev.ddtj.backend.data.objectmodel.BaseType;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.AccessLevel;
+import com.sun.jdi.request.StepRequest;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
-public class ParentMethod {
-    private String signature;
-    private String name;
-    private BaseType[] parameters;
-    private BaseType returnValue;
-    private boolean applicable;
-
-    @Setter(AccessLevel.PACKAGE)
-    @Getter(AccessLevel.PACKAGE)
-    private List<Invocation> invocations = new ArrayList<>();
-
-    public synchronized void addInvocation(Invocation invocation) {
-        invocations.add(invocation);
-    }
-
-    public synchronized int getInvocationCount() {
-        return invocations.size();
-    }
-
-    public synchronized List<Invocation> listInvocations() {
-        return new ArrayList<>(invocations.size());
-    }
+public class ExecutionState {
+    private Invocation invocation;
+    private ParentMethod parentMethod;
+    private String className;
+    private StepRequest stepRequest;
+    private MockInvocation currentMockInvocation;
 }

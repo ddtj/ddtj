@@ -37,13 +37,13 @@ class DataCollectorTests {
     @Test
     void testProcessEvent() {
         DataCollector dataCollector = new DataCollector();
-        Assertions.assertTrue(dataCollector.processEvent(monitoredSession, vmDeathEvent));
+        Assertions.assertTrue(dataCollector.processEvent(monitoredSession, vmDeathEvent, 1));
 
         Mockito.when(methodEntryEvent.method()).thenReturn(method);
-        Mockito.when(monitoredSession.enteringMethod(method)).thenReturn(parentMethod);
+        Mockito.when(monitoredSession.getOrCreateMethod(method)).thenReturn(parentMethod);
 
-        Assertions.assertFalse(dataCollector.processEvent(monitoredSession, methodEntryEvent));
+        Assertions.assertFalse(dataCollector.processEvent(monitoredSession, methodEntryEvent, 1));
         Mockito.verify(monitoredSession, Mockito.times(1))
-                .enteringMethod(method);
+                .getOrCreateMethod(method);
     }
 }

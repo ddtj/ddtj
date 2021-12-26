@@ -59,13 +59,18 @@ public class MainService {
     }
 
     public List<ClassDTO> listClasses() {
-        return session.listClasses().stream().map(parentClass -> {
-            ClassDTO classDTO = new ClassDTO();
-            classDTO.setName(parentClass.getName());
-            classDTO.setMethods(parentClass.getMethodCount());
-            classDTO.setTotalExecutions(parentClass.countTotalExecutions());
-            return classDTO;
-        }).collect(Collectors.toList());
+        // TODO: This is a bit inefficient filtering should happen first and counting should be beforehand
+        return session.listClasses().stream()
+                .map(parentClass -> {
+                    int methodCount = listMethods(parentClass.getName()).size();
+                    ClassDTO classDTO = new ClassDTO();
+                    classDTO.setName(parentClass.getName());
+                    classDTO.setMethods(methodCount);
+                    classDTO.setTotalExecutions(parentClass.countTotalExecutions());
+                    return classDTO;
+                })
+                .filter(c -> c.getMethods() > 0)
+                .collect(Collectors.toList());
     }
 
     public List<MethodDTO> listMethods(String className) {
@@ -73,12 +78,14 @@ public class MainService {
         // we'll need a better error message
         ParentClass parentClass = session.getClass(className);
         List<ParentMethod> methods = parentClass.listMethods();
-        return methods.stream().map(parentMethod -> {
-            MethodDTO methodDTO = new MethodDTO();
-            methodDTO.setSignature(parentMethod.getSignature());
-            methodDTO.setTotalExecutions(parentMethod.getInvocationCount());
-            return methodDTO;
-        }).collect(Collectors.toList());
+        return methods.stream()
+                .filter(ParentMethod::isApplicable)
+                .map(parentMethod -> {
+                    MethodDTO methodDTO = new MethodDTO();
+                    methodDTO.setSignature(parentMethod.getSignature());
+                    methodDTO.setTotalExecutions(parentMethod.getInvocationCount());
+                    return methodDTO;
+                }).collect(Collectors.toList());
 
     }
 

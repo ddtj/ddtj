@@ -15,37 +15,23 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dev.ddtj.backend.data;
+package dev.ddtj.backend.data.objectmodel;
 
-import dev.ddtj.backend.data.objectmodel.BaseType;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import com.sun.jdi.Value;
+import java.lang.reflect.Array;
 
-@Data
-public class ParentMethod {
-    private String signature;
-    private String name;
-    private BaseType[] parameters;
-    private BaseType returnValue;
-    private boolean applicable;
+public abstract class BaseType implements BaseTypeInterface, ArrayCreation {
+  private final String type;
 
-    @Setter(AccessLevel.PACKAGE)
-    @Getter(AccessLevel.PACKAGE)
-    private List<Invocation> invocations = new ArrayList<>();
+  protected BaseType(String type) {
+    this.type = type;
+  }
 
-    public synchronized void addInvocation(Invocation invocation) {
-        invocations.add(invocation);
-    }
+  public String getType() {
+    return type;
+  }
 
-    public synchronized int getInvocationCount() {
-        return invocations.size();
-    }
-
-    public synchronized List<Invocation> listInvocations() {
-        return new ArrayList<>(invocations.size());
-    }
+  public void setArrayValue(Object array, int index, Value value) {
+    Array.set(array, index, getValue(value));
+  }
 }

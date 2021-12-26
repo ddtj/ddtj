@@ -15,37 +15,26 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dev.ddtj.backend.data;
+package dev.ddtj.backend;
 
-import dev.ddtj.backend.data.objectmodel.BaseType;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import dev.ddtj.backend.dto.VMDTO;
+import dev.ddtj.backend.javadebugger.ConnectSession;
+import dev.ddtj.backend.javadebugger.MonitoredSession;
+import java.io.IOException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-@Data
-public class ParentMethod {
-    private String signature;
-    private String name;
-    private BaseType[] parameters;
-    private BaseType returnValue;
-    private boolean applicable;
+@SpringBootTest
+class BasicTests {
+    @Autowired
+    private ConnectSession connectSession;
 
-    @Setter(AccessLevel.PACKAGE)
-    @Getter(AccessLevel.PACKAGE)
-    private List<Invocation> invocations = new ArrayList<>();
-
-    public synchronized void addInvocation(Invocation invocation) {
-        invocations.add(invocation);
-    }
-
-    public synchronized int getInvocationCount() {
-        return invocations.size();
-    }
-
-    public synchronized List<Invocation> listInvocations() {
-        return new ArrayList<>(invocations.size());
+    @Test
+    void runBasicTest() throws IOException {
+        MonitoredSession monitoredSession = connectSession.create(new VMDTO(null,
+                null, BasicTests.class.getName(), null));
+        Assertions.assertNotNull(monitoredSession);
     }
 }

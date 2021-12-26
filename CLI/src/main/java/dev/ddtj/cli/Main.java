@@ -30,7 +30,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-@Command(name = "ddtj", mixinStandardHelpOptions = true, version = "0.0.3",
+@Command(name = "ddtj", mixinStandardHelpOptions = true, version = "0.0.4",
         description = "DDT: It kills bugs", helpCommand = true,
         abbreviateSynopsis = true)
 public class Main implements Callable<Integer> {

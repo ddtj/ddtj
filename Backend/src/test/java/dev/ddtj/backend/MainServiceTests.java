@@ -76,7 +76,7 @@ class MainServiceTests {
     private void initLombok() {
         invocation.setArguments(new Object[]{" "});
         invocation.setTime(System.currentTimeMillis());
-        invocation.setMockInvocations(List.of(mockInvocation));
+        invocation.addMockInvocation(mockInvocation);
         invocation.setId("1");
         invocation.setResult(new Object());
         invocation.setThrownException("");
