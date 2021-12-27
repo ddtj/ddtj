@@ -20,7 +20,6 @@ package dev.ddtj.backend.testdata;
 public class BasicDependency {
     public String otherMethod(String key, int counter) throws InterruptedException {
         System.out.println("otherMethod");
-        Thread.sleep(40000);
         return key + " " + counter;
     }
 }

@@ -25,6 +25,8 @@ import com.sun.jdi.connect.LaunchingConnector;
 import com.sun.jdi.connect.VMStartException;
 import com.sun.jdi.request.EventRequest;
 import com.sun.jdi.request.MethodEntryRequest;
+import com.sun.jdi.request.MethodExitRequest;
+import com.sun.jdi.request.VMDeathRequest;
 import dev.ddtj.backend.dto.VMDTO;
 import java.io.IOException;
 import java.util.Map;
@@ -57,9 +59,17 @@ public class ConnectSession {
                 vmdto.setFilter(vmdto.getMain().substring(vmdto.getMain().lastIndexOf('.') + 1) + "*");
             }
             MethodEntryRequest methodEntryRequest = vm.eventRequestManager().createMethodEntryRequest();
-            //methodEntryRequest.addClassFilter(vmdto.getFilter());
             methodEntryRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
             methodEntryRequest.enable();
+
+            MethodExitRequest methodExitRequest = vm.eventRequestManager().createMethodExitRequest();
+            methodExitRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+            methodExitRequest.enable();
+
+            VMDeathRequest vmDeathRequest = vm.eventRequestManager().createVMDeathRequest();
+            vmDeathRequest.setSuspendPolicy(EventRequest.SUSPEND_ALL);
+            vmDeathRequest.enable();
+
             MonitoredSession session = new MonitoredSession(vm, vmdto.getFilter());
             collector.collect(session);
             return session;

@@ -17,13 +17,7 @@
  */
 package dev.ddtj.backend.data;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
 public class Invocation {
@@ -32,19 +26,6 @@ public class Invocation {
     private Object[] arguments;
     private Object result;
     private String thrownException;
-
-    @Setter(AccessLevel.PACKAGE)
-    @Getter(AccessLevel.PACKAGE)
-    private List<MockInvocation> mockInvocations;
-
-    public synchronized void addMockInvocation(MockInvocation mockInvocation) {
-        if(mockInvocations == null) {
-            mockInvocations = new ArrayList<>();
-        }
-        mockInvocations.add(mockInvocation);
-    }
-
-    public synchronized List<MockInvocation> getMockInvocations() {
-        return Collections.unmodifiableList(mockInvocations);
-    }
+    private long threadId;
+    private ParentMethod[] stack;
 }

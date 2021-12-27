@@ -33,7 +33,7 @@ public class ParentClass {
 
     @Setter(AccessLevel.PACKAGE)
     @Getter(AccessLevel.PACKAGE)
-    private Set<ParentMethod> methods = new TreeSet<>(Comparator.comparing(ParentMethod::getSignature));
+    private Set<ParentMethod> methods = new TreeSet<>(Comparator.comparing(ParentMethod::fullName));
 
     public synchronized List<ParentMethod> listMethods() {
         return new ArrayList<>(methods);
@@ -51,8 +51,8 @@ public class ParentClass {
         return methods.size();
     }
 
-    public synchronized ParentMethod findMethod(String signature) {
-        return methods.stream().filter(m -> m.getSignature().equals(signature)).findFirst()
+    public synchronized ParentMethod findMethod(String fullName) {
+        return methods.stream().filter(m -> m.fullName().equals(fullName)).findFirst()
                 .orElse(null);
     }
 }

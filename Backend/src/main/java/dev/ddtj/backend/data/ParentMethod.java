@@ -27,6 +27,8 @@ import lombok.Setter;
 
 @Data
 public class ParentMethod {
+    private boolean initializationFailure;
+    private ParentClass parentClass;
     private String signature;
     private String name;
     private BaseType[] parameters;
@@ -47,5 +49,9 @@ public class ParentMethod {
 
     public synchronized List<Invocation> listInvocations() {
         return new ArrayList<>(invocations.size());
+    }
+
+    public String fullName() {
+        return name + signature;
     }
 }

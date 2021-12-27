@@ -82,16 +82,16 @@ public class MainService {
                 .filter(ParentMethod::isApplicable)
                 .map(parentMethod -> {
                     MethodDTO methodDTO = new MethodDTO();
-                    methodDTO.setSignature(parentMethod.getSignature());
+                    methodDTO.setFullName(parentMethod.fullName());
                     methodDTO.setTotalExecutions(parentMethod.getInvocationCount());
                     return methodDTO;
                 }).collect(Collectors.toList());
 
     }
 
-    public List<TestTimeDTO> listInvocations(String className, String methodSignature) {
+    public List<TestTimeDTO> listInvocations(String className, String methodFullName) {
         ParentClass parentClass = session.getClass(className);
-        ParentMethod method = parentClass.findMethod(methodSignature);
+        ParentMethod method = parentClass.findMethod(methodFullName);
         return method.listInvocations().stream().map(invocation -> {
             TestTimeDTO testTimeDTO = new TestTimeDTO();
             testTimeDTO.setTime(invocation.getTime());

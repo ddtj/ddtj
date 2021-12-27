@@ -18,10 +18,15 @@
 package dev.ddtj.backend;
 
 import com.sun.jdi.AbsentInformationException;
+import com.sun.jdi.ClassNotLoadedException;
+import com.sun.jdi.IntegerType;
+import com.sun.jdi.IntegerValue;
 import com.sun.jdi.LocalVariable;
 import com.sun.jdi.Method;
+import com.sun.jdi.PrimitiveType;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.VirtualMachine;
+import dev.ddtj.backend.data.objectmodel.PrimitiveAndWrapperType;
 import dev.ddtj.backend.javadebugger.MonitoredSession;
 import java.util.List;
 import lombok.extern.java.Log;
@@ -47,31 +52,36 @@ class MonitoredSessionTests {
     @Mock
     private ReferenceType referenceType;
 
+    @Mock
+    private IntegerType integerType;
+
     private static final String DECLARING_CLASS = "test.MyTestClass";
     private static final String METHOD_SIGNATURE = "testMethodName()";
 
     @Test
-    void enteringMethodTest() throws AbsentInformationException {
+    void enteringMethodTest() throws AbsentInformationException, ClassNotLoadedException {
         MonitoredSession session = initSession();
-        Mockito.when(method.arguments()).thenReturn(List.of(localVariable));
-        Mockito.when(localVariable.name()).thenReturn("testArg");
-        Mockito.when(localVariable.typeName()).thenReturn("int");
+        //Mockito.when(method.arguments()).thenReturn(List.of(localVariable));
+        //Mockito.when(localVariable.name()).thenReturn("testArg");
+        //Mockito.when(localVariable.typeName()).thenReturn("int");
         Assertions.assertSame(session.getOrCreateMethod(method), session.getOrCreateMethod(method));
     }
 
     @Test()
-    void absentInformationExceptionTest() throws AbsentInformationException {
+    void absentInformationExceptionTest() throws AbsentInformationException, ClassNotLoadedException {
         MonitoredSession session = initSession();
-        Mockito.when(method.arguments()).thenThrow(new AbsentInformationException());
+        Mockito.lenient().when(method.arguments()).thenThrow(new AbsentInformationException());
         log.severe("There should be a stack trace for AbsentInformationException, this is valid and part of the test");
         Assertions.assertSame(session.getOrCreateMethod(method), session.getOrCreateMethod(method));
     }
 
-    private MonitoredSession initSession() {
+    private MonitoredSession initSession() throws ClassNotLoadedException {
         MonitoredSession session = new MonitoredSession(virtualMachine, "test.*");
         Mockito.when(referenceType.name()).thenReturn(DECLARING_CLASS);
         Mockito.when(method.declaringType()).thenReturn(referenceType);
         Mockito.when(method.signature()).thenReturn(METHOD_SIGNATURE);
+        Mockito.when(method.returnType()).thenReturn(integerType);
+        Mockito.when(integerType.name()).thenReturn("int");
         return session;
     }
 }

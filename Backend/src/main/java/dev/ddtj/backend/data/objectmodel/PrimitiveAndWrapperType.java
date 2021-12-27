@@ -37,7 +37,7 @@ public class PrimitiveAndWrapperType extends BaseType {
             v -> null);
 
     public static final PrimitiveAndWrapperType BOOLEAN = new PrimitiveAndWrapperType("boolean", false,
-            v -> ((BooleanValue)v).value(),
+            v -> v instanceof BooleanValue ? ((BooleanValue)v).value() : ((ByteValue)v).booleanValue(),
             boolean[]::new) {
         @Override
         public void setArrayValue(Object array, int index, Value value) {
@@ -46,7 +46,7 @@ public class PrimitiveAndWrapperType extends BaseType {
     };
 
     public static final PrimitiveAndWrapperType BOOLEAN_WRAPPER = new PrimitiveAndWrapperType(Boolean.class.getName(),
-            true, v -> ((BooleanValue)v).value(),
+            true, v -> v instanceof BooleanValue ? ((BooleanValue)v).value() : ((ByteValue)v).booleanValue(),
             Boolean[]::new);
 
     public static final PrimitiveAndWrapperType BYTE = new PrimitiveAndWrapperType("byte", false,

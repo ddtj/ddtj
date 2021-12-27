@@ -20,7 +20,6 @@ package dev.ddtj.backend.rest;
 import dev.ddtj.backend.dto.ClassDTO;
 import dev.ddtj.backend.dto.MethodDTO;
 import dev.ddtj.backend.dto.TestTimeDTO;
-import dev.ddtj.backend.javadebugger.ConnectSession;
 import dev.ddtj.backend.dto.VMDTO;
 import dev.ddtj.backend.service.MainService;
 import java.io.IOException;
@@ -54,7 +53,7 @@ public class MainWS {
     }
 
     @GetMapping("/invocations")
-    public List<TestTimeDTO> listInvocations(String className, String methodSignature) {
-        return mainService.listInvocations(className, methodSignature);
+    public List<TestTimeDTO> listInvocations(String className, String method) {
+        return mainService.listInvocations(className, method);
     }
 }

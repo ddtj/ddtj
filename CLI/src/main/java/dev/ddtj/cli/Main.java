@@ -89,6 +89,15 @@ public class Main implements Callable<Integer> {
             return response.statusCode() == 200 ? 0 : response.statusCode();
         }
 
+        if(listClasses) {
+            HttpRequest request = HttpRequest.newBuilder(URI.create(baseUrl + "/classes")).GET()
+                    .build();
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
+            return 0;
+        }
+
         cmd.usage(System.err);
         return 1;
     }

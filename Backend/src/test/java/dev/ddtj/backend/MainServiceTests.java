@@ -1,7 +1,6 @@
 package dev.ddtj.backend;
 
 import dev.ddtj.backend.data.Invocation;
-import dev.ddtj.backend.data.MockInvocation;
 import dev.ddtj.backend.data.ParentClass;
 import dev.ddtj.backend.data.ParentMethod;
 import dev.ddtj.backend.dto.ClassDTO;
@@ -39,20 +38,21 @@ class MainServiceTests {
     private final ParentMethod PARENT_METHOD = new ParentMethod();
     private final List<ParentClass> CLASS_LIST = List.of(PARENT_CLASS);
     private final Invocation invocation = new Invocation();
-    private final MockInvocation mockInvocation = new MockInvocation();
 
 
     @Test
     void testAPI() throws IOException {
         mainService.setSession(monitoredSession);
         Mockito.when(monitoredSession.listClasses()).thenReturn(CLASS_LIST);
-        PARENT_METHOD.setSignature("ParentMethod");
+        PARENT_METHOD.setSignature("B()");
+        PARENT_METHOD.setName("ParentMethod");
         initLombok();
 
         PARENT_METHOD.addInvocation(invocation);
         PARENT_CLASS.setName("ParentClass");
         PARENT_CLASS.addMethod(PARENT_METHOD);
         mainService.connect(vmDTO);
+        PARENT_METHOD.addInvocation(new Invocation());
         Mockito.verify(connectSession, Mockito.times(1))
                 .create(vmDTO);
 
@@ -62,28 +62,20 @@ class MainServiceTests {
                 .thenReturn(PARENT_CLASS);
 
         List<ClassDTO> classDTOS = mainService.listClasses();
-        assertEquals(1, classDTOS.size());
-        assertEquals(PARENT_CLASS.getName(), classDTOS.get(0).getName());
+        assertEquals(0, classDTOS.size());
 
         List<MethodDTO> methodDTOS = mainService.listMethods(PARENT_CLASS.getName());
-        assertEquals(1, methodDTOS.size());
-        assertEquals(PARENT_METHOD.getSignature(), methodDTOS.get(0).getSignature());
+        assertEquals(0, methodDTOS.size());
 
-        List<TestTimeDTO> testTimeDTOS = mainService.listInvocations(PARENT_CLASS.getName(), PARENT_METHOD.getSignature());
+        List<TestTimeDTO> testTimeDTOS = mainService.listInvocations(PARENT_CLASS.getName(), PARENT_METHOD.fullName());
         assertEquals(0, testTimeDTOS.size());
     }
 
     private void initLombok() {
         invocation.setArguments(new Object[]{" "});
         invocation.setTime(System.currentTimeMillis());
-        invocation.addMockInvocation(mockInvocation);
         invocation.setId("1");
         invocation.setResult(new Object());
         invocation.setThrownException("");
-
-        mockInvocation.setParentMethod(PARENT_METHOD);
-        mockInvocation.setArguments(invocation.getArguments());
-        mockInvocation.setReturnValue(invocation.getResult());
-        mockInvocation.setParentClass(PARENT_CLASS);
     }
 }

@@ -26,6 +26,5 @@ public class BasicApp {
     public void run() throws InterruptedException {
         System.out.println("This is the first testable method");
         System.out.println(dependency.otherMethod("This prints three", 3));
-        Thread.sleep(40000);
     }
 }

@@ -17,7 +17,6 @@
  */
 package dev.ddtj.backend.data;
 
-import com.sun.jdi.request.StepRequest;
 import lombok.Data;
 
 @Data
@@ -25,6 +24,4 @@ public class ExecutionState {
     private Invocation invocation;
     private ParentMethod parentMethod;
     private String className;
-    private StepRequest stepRequest;
-    private MockInvocation currentMockInvocation;
 }

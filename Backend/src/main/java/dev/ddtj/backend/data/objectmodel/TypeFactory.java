@@ -23,6 +23,7 @@ import com.sun.jdi.PrimitiveType;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.Type;
 import com.sun.jdi.Value;
+import com.sun.jdi.VoidType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,14 +37,22 @@ public class TypeFactory {
     }
 
     public static BaseType create(Type t) {
-        return cache.computeIfAbsent(t, TypeFactory::createImpl);
+        // Can't use computeIfAbsent because of recursive modification. When adding a new object the internal properties
+        // might change the map and computeIfAbsent will fail on that.
+        BaseType baseType = cache.get(t);
+        if(baseType == null) {
+            baseType = createImpl(t);
+            cache.put(t, baseType);
+        }
+        return baseType;
     }
 
     private static BaseType createImpl(Type t) {
+        if(t instanceof VoidType) {
+            return PrimitiveAndWrapperType.VOID;
+        }
         if(t instanceof PrimitiveType) {
             switch (t.name()) {
-                case "void":
-                    return PrimitiveAndWrapperType.VOID;
                 case "boolean":
                     return PrimitiveAndWrapperType.BOOLEAN;
                 case "byte":
@@ -73,7 +82,6 @@ public class TypeFactory {
                         ((ArrayType) t).componentTypeName(), e);
                 throw new IllegalStateException(e);
             }
-
         }
         ReferenceType rt = (ReferenceType) t;
         switch (rt.name()) {
