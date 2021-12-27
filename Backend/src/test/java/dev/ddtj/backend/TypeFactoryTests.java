@@ -17,11 +17,17 @@
  */
 package dev.ddtj.backend;
 
+import com.sun.jdi.ArrayType;
+import com.sun.jdi.ClassNotLoadedException;
 import com.sun.jdi.PrimitiveType;
 import com.sun.jdi.ReferenceType;
+import com.sun.jdi.VoidType;
+import dev.ddtj.backend.data.objectmodel.ArrayObjectOrPrimitiveType;
 import dev.ddtj.backend.data.objectmodel.BaseType;
+import dev.ddtj.backend.data.objectmodel.BuiltinTypes;
 import dev.ddtj.backend.data.objectmodel.PrimitiveAndWrapperType;
 import dev.ddtj.backend.data.objectmodel.TypeFactory;
+import java.lang.reflect.Array;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -35,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 class TypeFactoryTests {
 
     @Test
-    void testTypeFactory() {
+    void testTypeFactory() throws ClassNotLoadedException {
         testPrimitive("boolean");
         testPrimitive("byte");
         testPrimitive("char");
@@ -53,6 +59,21 @@ class TypeFactoryTests {
         testPrimitiveWrapper(Long.class.getName());
         testPrimitiveWrapper(Float.class.getName());
         testPrimitiveWrapper(Double.class.getName());
+
+        VoidType voidType = Mockito.mock(VoidType.class);
+        BaseType voidBaseType = TypeFactory.create(voidType);
+        assertEquals(PrimitiveAndWrapperType.VOID, voidBaseType);
+
+        ReferenceType referenceType = Mockito.mock(ReferenceType.class);
+        Mockito.when(referenceType.name()).thenReturn("java.lang.String");
+        assertEquals(BuiltinTypes.STRING, TypeFactory.create(referenceType));
+
+        ArrayType arrayType = Mockito.mock(ArrayType.class);
+        PrimitiveType intType = Mockito.mock(PrimitiveType.class);
+        Mockito.when(intType.name()).thenReturn("int");
+        Mockito.when(arrayType.componentType()).thenReturn(intType);
+        Mockito.when(arrayType.name()).thenReturn("I[");
+        assertInstanceOf(ArrayObjectOrPrimitiveType.class, TypeFactory.create(arrayType));
     }
 
     private void testPrimitive(String name) {
@@ -62,6 +83,7 @@ class TypeFactoryTests {
         assertEquals(name, baseType.getType());
         assertInstanceOf(PrimitiveAndWrapperType.class, baseType);
         assertFalse(((PrimitiveAndWrapperType)baseType).isWrapper());
+        assertEquals(5, Array.getLength(baseType.allocateArray(5)));
     }
 
     private void testPrimitiveWrapper(String name) {
@@ -71,6 +93,7 @@ class TypeFactoryTests {
         assertEquals(name, baseType.getType());
         assertInstanceOf(PrimitiveAndWrapperType.class, baseType);
         assertTrue(((PrimitiveAndWrapperType)baseType).isWrapper());
+        assertEquals(5, Array.getLength(baseType.allocateArray(5)));
     }
 
 }
