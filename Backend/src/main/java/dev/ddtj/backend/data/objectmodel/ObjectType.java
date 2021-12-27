@@ -87,12 +87,12 @@ public class ObjectType extends BaseType {
                         !field.isTransient() && !field.isSynthetic() && !field.isEnumConstant() && !field.isFinal())
                 .collect(java.util.stream.Collectors.toList());
         Optional<Method> fieldConstructor = findFieldConstructor(methodList, fieldList);
-        try {
-            if(fieldConstructor.isPresent()) {
+        if(fieldConstructor.isPresent()) {
+            try {
                 return createFieldConstructor(type, fieldConstructor.get());
+            } catch (ClassNotLoadedException | AbsentInformationException e) {
+                log.log(Level.SEVERE, "Could not load class: " + fieldConstructor.get(), e);
             }
-        } catch (ClassNotLoadedException | AbsentInformationException e) {
-            log.log(Level.SEVERE, "Could not load class: " + fieldConstructor.get(), e);
         }
         Optional<Method> defaultConstructor = findDefaultConstructor(methodList);
         if(defaultConstructor.isPresent()) {
