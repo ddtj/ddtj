@@ -36,6 +36,8 @@ public class TypeFactory {
         return create(value.type());
     }
 
+    private TypeFactory() {}
+
     public static BaseType create(Type t) {
         // Can't use computeIfAbsent because of recursive modification. When adding a new object the internal properties
         // might change the map and computeIfAbsent will fail on that.

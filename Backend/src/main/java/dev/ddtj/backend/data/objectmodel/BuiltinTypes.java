@@ -26,7 +26,7 @@ import com.sun.jdi.Value;
 public class BuiltinTypes extends BaseType {
     private final BaseTypeInterface value;
     private final ArrayCreation arrayCreation;
-    public static BuiltinTypes STRING = new BuiltinTypes(String.class.getName(), val -> ((StringReference)val).value(),
+    public static final BuiltinTypes STRING = new BuiltinTypes(String.class.getName(), val -> ((StringReference)val).value(),
             String[]::new);
 
 

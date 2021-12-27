@@ -174,13 +174,4 @@ public class DataCollector {
         }
         return arguments;
     }
-
-    private void limitBreakpointScope(MethodEntryEvent methodEntryEvent, Method currentMethod, MethodExitRequest methodExitRequest) throws IncompatibleThreadStateException {
-        if(currentMethod.isStatic() || currentMethod.isStaticInitializer()) {
-            methodExitRequest.addClassFilter(currentMethod.declaringType().name());
-        } else {
-            methodExitRequest.addInstanceFilter(methodEntryEvent.thread().frame(0).thisObject());
-        }
-    }
-
 }

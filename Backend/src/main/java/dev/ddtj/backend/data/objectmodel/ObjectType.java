@@ -32,11 +32,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import lombok.extern.java.Log;
 
 @Log
 public class ObjectType extends BaseType {
-    enum CreationType {
+    public enum CreationType {
         CONSTRUCTOR_FACTORY,
         SETTERS,
 
@@ -66,6 +67,10 @@ public class ObjectType extends BaseType {
         return supportedFields != null;
     }
 
+    public CreationType getCreationType() {
+        return creationType;
+    }
+
     public static ObjectType create(ReferenceType referenceType) {
         if(referenceType.isAbstract()) {
             return new ObjectType(referenceType.name(), null, null, CreationType.ABSTRACT);
@@ -82,35 +87,43 @@ public class ObjectType extends BaseType {
                         !field.isTransient() && !field.isSynthetic() && !field.isEnumConstant() && !field.isFinal())
                 .collect(java.util.stream.Collectors.toList());
         Optional<Method> fieldConstructor = findFieldConstructor(methodList, fieldList);
-        if(fieldConstructor.isPresent()) {
-            List<String> fieldNames = fieldConstructor.get().argumentTypeNames();
-            try {
-                BaseType[] types = TypeFactory.create(fieldConstructor.get().argumentTypes());
-                String[] supportedFields = new String[fieldNames.size()];
-                fieldNames.toArray(supportedFields);
-                return new ObjectType(type, supportedFields, types, CreationType.CONSTRUCTOR_FACTORY);
-            } catch (ClassNotLoadedException e) {
-                log.log(Level.SEVERE, "Could not load class: " + fieldConstructor.get(), e);
+        try {
+            if(fieldConstructor.isPresent()) {
+                return createFieldConstructor(type, fieldConstructor.get());
             }
+        } catch (ClassNotLoadedException | AbsentInformationException e) {
+            log.log(Level.SEVERE, "Could not load class: " + fieldConstructor.get(), e);
         }
         Optional<Method> defaultConstructor = findDefaultConstructor(methodList);
         if(defaultConstructor.isPresent()) {
-            List<Field> setters = findSetterFields(methodList, fieldList);
-            if(setters.size() >= fieldList.size() / 2) {
-                try {
-                    String[] settersArray = setters.stream().map(Field::name).toArray(String[]::new);
-                    List<Type> setterTypes = new ArrayList<>();
-                    for (Field setter : setters) {
-                        setterTypes.add(setter.type());
-                    }
-                    return new ObjectType(type, settersArray, TypeFactory.create(setterTypes), CreationType.SETTERS);
-                } catch (ClassNotLoadedException e) {
-                    log.log(Level.SEVERE, "Could not load class: " + setters.get(0), e);
-                }
-            }
-            return new ObjectType(type, null, null, CreationType.NO_VALID_SETTERS);
+            return createDefaultConstructor(type, methodList, fieldList);
         }
         return new ObjectType(type, null, null, CreationType.NO_VALID_CONSTRUCTOR);
+    }
+
+    private static ObjectType createDefaultConstructor(String type, List<Method> methodList, List<Field> fieldList) {
+        List<Field> setters = findSetterFields(methodList, fieldList);
+        if(setters.size() >= fieldList.size() / 2) {
+            try {
+                String[] settersArray = setters.stream().map(Field::name).toArray(String[]::new);
+                List<Type> setterTypes = new ArrayList<>();
+                for (Field setter : setters) {
+                    setterTypes.add(setter.type());
+                }
+                return new ObjectType(type, settersArray, TypeFactory.create(setterTypes), CreationType.SETTERS);
+            } catch (ClassNotLoadedException e) {
+                log.log(Level.SEVERE, "Could not load class: " + setters.get(0), e);
+            }
+        }
+        return new ObjectType(type, null, null, CreationType.NO_VALID_SETTERS);
+    }
+
+    private static ObjectType createFieldConstructor(String type, Method fieldConstructor) throws ClassNotLoadedException, AbsentInformationException {
+        List<String> fieldNames = fieldConstructor.arguments().stream().map(LocalVariable::name).collect(Collectors.toList());
+        BaseType[] types = TypeFactory.create(fieldConstructor.argumentTypes());
+        String[] supportedFields = new String[fieldNames.size()];
+        fieldNames.toArray(supportedFields);
+        return new ObjectType(type, supportedFields, types, CreationType.CONSTRUCTOR_FACTORY);
     }
 
     private static List<Field> findSetterFields(List<Method> methodList, List<Field> fieldList) {
@@ -173,7 +186,7 @@ public class ObjectType extends BaseType {
 
     private static Optional<Method> findDefaultConstructor(List<Method> methodList) {
         return methodList.stream().filter(method ->
-                        method.name().equals("<init>") && method.isPublic() && method.argumentTypeNames().size() == 0)
+                        method.name().equals("<init>") && method.isPublic() && method.argumentTypeNames().isEmpty())
                 .findFirst();
     }
 
