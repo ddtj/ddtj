@@ -20,17 +20,15 @@ package dev.ddtj.backend;
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.ClassNotLoadedException;
 import com.sun.jdi.IntegerType;
-import com.sun.jdi.IntegerValue;
 import com.sun.jdi.LocalVariable;
 import com.sun.jdi.Method;
-import com.sun.jdi.PrimitiveType;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.VirtualMachine;
-import dev.ddtj.backend.data.objectmodel.PrimitiveAndWrapperType;
+import dev.ddtj.backend.data.ParentMethod;
 import dev.ddtj.backend.javadebugger.MonitoredSession;
-import java.util.List;
+import java.util.ArrayList;
 import lombok.extern.java.Log;
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -61,10 +59,7 @@ class MonitoredSessionTests {
     @Test
     void enteringMethodTest() throws AbsentInformationException, ClassNotLoadedException {
         MonitoredSession session = initSession();
-        //Mockito.when(method.arguments()).thenReturn(List.of(localVariable));
-        //Mockito.when(localVariable.name()).thenReturn("testArg");
-        //Mockito.when(localVariable.typeName()).thenReturn("int");
-        Assertions.assertSame(session.getOrCreateMethod(method), session.getOrCreateMethod(method));
+        assertSame(session.getOrCreateMethod(method), session.getOrCreateMethod(method));
     }
 
     @Test()
@@ -72,7 +67,46 @@ class MonitoredSessionTests {
         MonitoredSession session = initSession();
         Mockito.lenient().when(method.arguments()).thenThrow(new AbsentInformationException());
         log.severe("There should be a stack trace for AbsentInformationException, this is valid and part of the test");
-        Assertions.assertSame(session.getOrCreateMethod(method), session.getOrCreateMethod(method));
+        assertSame(session.getOrCreateMethod(method), session.getOrCreateMethod(method));
+    }
+
+    @Test
+    void validateMethodTest() throws ClassNotLoadedException, AbsentInformationException {
+        MonitoredSession session = initSession();
+        Mockito.lenient().when(method.arguments()).thenReturn(new ArrayList<>());
+        ParentMethod parentMethod = session.getOrCreateMethod(method);
+        parentMethod.setInitializationFailure(true);
+        session.validateMethod(method, parentMethod);
+        assertEquals(0, parentMethod.getParameters().length);
+    }
+
+    @Test
+    void validateMethodIsNativeTest() throws ClassNotLoadedException, AbsentInformationException {
+        MonitoredSession session = initSession();
+        Mockito.lenient().when(method.isNative()).thenReturn(true);
+        ParentMethod parentMethod = session.getOrCreateMethod(method);
+        assertEquals(0, parentMethod.getParameters().length);
+    }
+
+    @Test
+    void validateMethodExceptionTest() throws ClassNotLoadedException, AbsentInformationException {
+        MonitoredSession session = initSession();
+        Mockito.lenient().when(method.arguments()).thenReturn(new ArrayList<>());
+        Mockito.lenient().when(method.returnType()).thenThrow(ClassNotLoadedException.class);
+        ParentMethod parentMethod = session.getOrCreateMethod(method);
+        assertTrue(parentMethod.isInitializationFailure());
+    }
+
+    @Test
+    void listClassTest() {
+        MonitoredSession session = new MonitoredSession(virtualMachine, "test.*");
+        assertEquals(0, session.listClasses().size());
+    }
+
+    @Test
+    void listMethodTest() {
+        MonitoredSession session = new MonitoredSession(virtualMachine, "test.*");
+        assertNull(session.getClass("DummyClass"));
     }
 
     private MonitoredSession initSession() throws ClassNotLoadedException {
@@ -81,7 +115,7 @@ class MonitoredSessionTests {
         Mockito.when(method.declaringType()).thenReturn(referenceType);
         Mockito.when(method.signature()).thenReturn(METHOD_SIGNATURE);
         Mockito.when(method.returnType()).thenReturn(integerType);
-        Mockito.when(integerType.name()).thenReturn("int");
+        Mockito.lenient().when(integerType.name()).thenReturn("int");
         return session;
     }
 }

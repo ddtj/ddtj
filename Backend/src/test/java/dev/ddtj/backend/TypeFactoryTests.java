@@ -18,9 +18,18 @@
 package dev.ddtj.backend;
 
 import com.sun.jdi.ArrayType;
+import com.sun.jdi.BooleanValue;
+import com.sun.jdi.ByteValue;
+import com.sun.jdi.CharValue;
 import com.sun.jdi.ClassNotLoadedException;
+import com.sun.jdi.DoubleValue;
+import com.sun.jdi.FloatValue;
+import com.sun.jdi.IntegerValue;
+import com.sun.jdi.LongValue;
 import com.sun.jdi.PrimitiveType;
 import com.sun.jdi.ReferenceType;
+import com.sun.jdi.ShortValue;
+import com.sun.jdi.Value;
 import com.sun.jdi.VoidType;
 import dev.ddtj.backend.data.objectmodel.ArrayObjectOrPrimitiveType;
 import dev.ddtj.backend.data.objectmodel.BaseType;
@@ -42,14 +51,37 @@ class TypeFactoryTests {
 
     @Test
     void testTypeFactory() throws ClassNotLoadedException {
-        testPrimitive("boolean");
-        testPrimitive("byte");
-        testPrimitive("char");
-        testPrimitive("short");
-        testPrimitive("int");
-        testPrimitive("long");
-        testPrimitive("float");
-        testPrimitive("double");
+        BooleanValue booleanValue = Mockito.mock(BooleanValue.class);
+        Mockito.when(booleanValue.value()).thenReturn(true);
+        testPrimitive("boolean", booleanValue);
+
+        ByteValue byteValue = Mockito.mock(ByteValue.class);
+        Mockito.when(byteValue.value()).thenReturn((byte)1);
+        testPrimitive("byte", byteValue);
+
+        CharValue charValue = Mockito.mock(CharValue.class);
+        Mockito.when(charValue.value()).thenReturn('a');
+        testPrimitive("char", charValue);
+
+        ShortValue shortValue = Mockito.mock(ShortValue.class);
+        Mockito.when(shortValue.value()).thenReturn((short)1);
+        testPrimitive("short", shortValue);
+
+        IntegerValue integerValue = Mockito.mock(IntegerValue.class);
+        Mockito.when(integerValue.value()).thenReturn(1);
+        testPrimitive("int", integerValue);
+
+        LongValue longValue = Mockito.mock(LongValue.class);
+        Mockito.when(longValue.value()).thenReturn(1L);
+        testPrimitive("long", longValue);
+
+        FloatValue floatValue = Mockito.mock(FloatValue.class);
+        Mockito.when(floatValue.value()).thenReturn(1.0f);
+        testPrimitive("float", floatValue);
+
+        DoubleValue doubleValue = Mockito.mock(DoubleValue.class);
+        Mockito.when(doubleValue.value()).thenReturn(1.0);
+        testPrimitive("double", doubleValue);
 
         testPrimitiveWrapper(Boolean.class.getName());
         testPrimitiveWrapper(Byte.class.getName());
@@ -76,14 +108,16 @@ class TypeFactoryTests {
         assertInstanceOf(ArrayObjectOrPrimitiveType.class, TypeFactory.create(arrayType));
     }
 
-    private void testPrimitive(String name) {
+    private void testPrimitive(String name, Value primitiveValue) {
         PrimitiveType primitiveType = Mockito.mock(PrimitiveType.class);
         Mockito.when(primitiveType.name()).thenReturn(name);
         BaseType baseType = TypeFactory.create(primitiveType);
         assertEquals(name, baseType.getType());
         assertInstanceOf(PrimitiveAndWrapperType.class, baseType);
         assertFalse(((PrimitiveAndWrapperType)baseType).isWrapper());
-        assertEquals(5, Array.getLength(baseType.allocateArray(5)));
+        Object primitiveArray = baseType.allocateArray(5);
+        baseType.setArrayValue(primitiveArray, 0, primitiveValue);
+        assertEquals(5, Array.getLength(primitiveArray));
     }
 
     private void testPrimitiveWrapper(String name) {
@@ -95,5 +129,4 @@ class TypeFactoryTests {
         assertTrue(((PrimitiveAndWrapperType)baseType).isWrapper());
         assertEquals(5, Array.getLength(baseType.allocateArray(5)));
     }
-
 }
