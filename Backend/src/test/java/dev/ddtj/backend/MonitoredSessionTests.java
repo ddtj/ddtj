@@ -89,6 +89,14 @@ class MonitoredSessionTests {
     }
 
     @Test
+    void validateMethodIsStaticInitializerTest() throws ClassNotLoadedException, AbsentInformationException {
+        MonitoredSession session = initSession();
+        Mockito.lenient().when(method.isStaticInitializer()).thenReturn(true);
+        ParentMethod parentMethod = session.getOrCreateMethod(method);
+        assertEquals(0, parentMethod.getParameters().length);
+    }
+
+    @Test
     void validateMethodExceptionTest() throws ClassNotLoadedException, AbsentInformationException {
         MonitoredSession session = initSession();
         Mockito.lenient().when(method.arguments()).thenReturn(new ArrayList<>());
@@ -107,6 +115,20 @@ class MonitoredSessionTests {
     void listMethodTest() {
         MonitoredSession session = new MonitoredSession(virtualMachine, "test.*");
         assertNull(session.getClass("DummyClass"));
+    }
+
+    @Test
+    void sessionIdTest() {
+        MonitoredSession session = new MonitoredSession(virtualMachine, "test.*");
+        assertNull(session.getSessionId());
+        session.setSessionId("X");
+        assertEquals("X", session.getSessionId());
+        try {
+            session.setSessionId("Y");
+        } catch (IllegalStateException e) {
+            return;
+        }
+        fail("IllegalStateException should have been thrown");
     }
 
     private MonitoredSession initSession() throws ClassNotLoadedException {

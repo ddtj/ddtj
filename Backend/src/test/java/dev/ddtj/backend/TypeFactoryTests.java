@@ -117,6 +117,7 @@ class TypeFactoryTests {
         assertFalse(((PrimitiveAndWrapperType)baseType).isWrapper());
         Object primitiveArray = baseType.allocateArray(5);
         baseType.setArrayValue(primitiveArray, 0, primitiveValue);
+        baseType.getValue(primitiveValue);
         assertEquals(5, Array.getLength(primitiveArray));
     }
 

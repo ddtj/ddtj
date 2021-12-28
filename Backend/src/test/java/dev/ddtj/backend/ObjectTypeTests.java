@@ -18,21 +18,27 @@
 package dev.ddtj.backend;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.ClassNotLoadedException;
 import com.sun.jdi.Field;
 import com.sun.jdi.IntegerType;
+import com.sun.jdi.IntegerValue;
 import com.sun.jdi.LocalVariable;
 import com.sun.jdi.Method;
+import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.StackFrame;
 import com.sun.jdi.Type;
 import com.sun.jdi.VirtualMachine;
+import dev.ddtj.backend.data.objectmodel.BaseType;
 import dev.ddtj.backend.data.objectmodel.ObjectType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -61,16 +67,28 @@ class ObjectTypeTests {
         assertEquals(ObjectType.CreationType.PACKAGE_PRIVATE, ObjectType.create(type).getCreationType());
 
 
-
         Mockito.when(integerType.name()).thenReturn("int");
-        List<Field> fields = Arrays.asList(create("field1", integerType), create("field2", integerType));
+        Field field1 = create("field1", integerType);
+        Field field2 = create("field2", integerType);
+        List<Field> fields = Arrays.asList(field1, field2);
 
         List<Method> methods = Arrays.asList(create("setField1", "void", "int"),
                 create("setField2", "int", "int"),
                 create("<init>", "void"));
 
         type = createClass(methods, fields);
-        assertEquals(ObjectType.CreationType.SETTERS, ObjectType.create(type).getCreationType());
+        ObjectType settersType = ObjectType.create(type);
+        assertEquals(ObjectType.CreationType.SETTERS, settersType.getCreationType());
+        assertTrue(settersType.canObjectBeCreated());
+
+        ObjectReference object = Mockito.mock(ObjectReference.class);
+        IntegerValue value = Mockito.mock(IntegerValue.class);
+        Mockito.when(value.value()).thenReturn(1);
+        Mockito.when(object.getValue(field1)).thenReturn(value);
+        Mockito.when(object.getValue(field2)).thenReturn(value);
+        Object valueResult = settersType.getValue(object);
+        assertInstanceOf(Map.class, valueResult);
+        assertEquals(2, ((Map) valueResult).size());
 
         type = createClass(methods.subList(0, 1), fields);
         assertEquals(ObjectType.CreationType.NO_VALID_CONSTRUCTOR, ObjectType.create(type).getCreationType());
