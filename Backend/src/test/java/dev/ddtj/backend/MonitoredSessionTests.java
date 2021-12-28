@@ -19,11 +19,19 @@ package dev.ddtj.backend;
 
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.ClassNotLoadedException;
+import com.sun.jdi.IncompatibleThreadStateException;
 import com.sun.jdi.IntegerType;
 import com.sun.jdi.LocalVariable;
+import com.sun.jdi.Location;
 import com.sun.jdi.Method;
+import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
+import com.sun.jdi.StackFrame;
+import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VirtualMachine;
+import com.sun.jdi.event.MethodEntryEvent;
+import com.sun.jdi.event.MethodExitEvent;
+import dev.ddtj.backend.data.ExecutionState;
 import dev.ddtj.backend.data.ParentMethod;
 import dev.ddtj.backend.javadebugger.MonitoredSession;
 import java.util.ArrayList;
@@ -118,6 +126,37 @@ class MonitoredSessionTests {
     }
 
     @Test
+    void testExecutionState() throws ClassNotLoadedException, IncompatibleThreadStateException {
+        MonitoredSession session = initSession();
+        assertEquals(0, session.getPendingExecutionCount());
+        MethodEntryEvent methodEntryEvent = Mockito.mock(MethodEntryEvent.class);
+        ThreadReference threadReference = Mockito.mock(ThreadReference.class);
+        Mockito.when(methodEntryEvent.thread()).thenReturn(threadReference);
+
+        StackFrame stackFrame = Mockito.mock(StackFrame.class);
+        Mockito.when(threadReference.frame(0)).thenReturn(stackFrame);
+        Mockito.when(threadReference.frameCount()).thenReturn(1);
+        Mockito.when(threadReference.uniqueID()).thenReturn(1L);
+
+        ObjectReference thisInstance = Mockito.mock(ObjectReference.class);
+        Mockito.when(stackFrame.thisObject()).thenReturn(thisInstance);
+        Mockito.when(thisInstance.uniqueID()).thenReturn(1L);
+
+        Location location = Mockito.mock(Location.class);
+        Mockito.when(stackFrame.location()).thenReturn(location);
+        Mockito.when(location.method()).thenReturn(method);
+
+        ExecutionState executionState = new ExecutionState();
+        session.queueExecutionState(methodEntryEvent, executionState);
+        assertEquals(1, session.getPendingExecutionCount());
+
+        MethodExitEvent methodExitEvent = Mockito.mock(MethodExitEvent.class);
+        Mockito.when(methodExitEvent.thread()).thenReturn(threadReference);
+        assertSame(executionState, session.removeExecutionState(methodExitEvent));
+        assertEquals(0, session.getPendingExecutionCount());
+    }
+
+    @Test
     void sessionIdTest() {
         MonitoredSession session = new MonitoredSession(virtualMachine, "test.*");
         assertNull(session.getSessionId());
@@ -136,7 +175,7 @@ class MonitoredSessionTests {
         Mockito.when(referenceType.name()).thenReturn(DECLARING_CLASS);
         Mockito.when(method.declaringType()).thenReturn(referenceType);
         Mockito.when(method.signature()).thenReturn(METHOD_SIGNATURE);
-        Mockito.when(method.returnType()).thenReturn(integerType);
+        Mockito.lenient().when(method.returnType()).thenReturn(integerType);
         Mockito.lenient().when(integerType.name()).thenReturn("int");
         return session;
     }

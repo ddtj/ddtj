@@ -158,6 +158,13 @@ public class MonitoredSession {
         this.sessionId = sessionId;
     }
 
+    /**
+     * Used only for testing
+     */
+    public int getPendingExecutionCount() {
+        return pendingExecutions.size();
+    }
+
     public void queueExecutionState(MethodEntryEvent event, ExecutionState executionState) throws IncompatibleThreadStateException {
         ThreadReference thread = event.thread();
         pendingExecutions.put(generateInvocationSignature(thread), executionState);

@@ -35,6 +35,7 @@ import com.sun.jdi.Type;
 import com.sun.jdi.VirtualMachine;
 import dev.ddtj.backend.data.objectmodel.BaseType;
 import dev.ddtj.backend.data.objectmodel.ObjectType;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -89,6 +90,8 @@ class ObjectTypeTests {
         Object valueResult = settersType.getValue(object);
         assertInstanceOf(Map.class, valueResult);
         assertEquals(2, ((Map) valueResult).size());
+
+        assertEquals(5, Array.getLength(settersType.allocateArray(5)));
 
         type = createClass(methods.subList(0, 1), fields);
         assertEquals(ObjectType.CreationType.NO_VALID_CONSTRUCTOR, ObjectType.create(type).getCreationType());
