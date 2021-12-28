@@ -82,15 +82,6 @@ class ObjectTypeTests {
         assertEquals(ObjectType.CreationType.SETTERS, settersType.getCreationType());
         assertTrue(settersType.canObjectBeCreated());
 
-        ObjectReference object = Mockito.mock(ObjectReference.class);
-        IntegerValue value = Mockito.mock(IntegerValue.class);
-        Mockito.when(value.value()).thenReturn(1);
-        Mockito.when(object.getValue(field1)).thenReturn(value);
-        Mockito.when(object.getValue(field2)).thenReturn(value);
-        Object valueResult = settersType.getValue(object);
-        assertInstanceOf(Map.class, valueResult);
-        assertEquals(2, ((Map) valueResult).size());
-
         assertEquals(5, Array.getLength(settersType.allocateArray(5)));
 
         type = createClass(methods.subList(0, 1), fields);
