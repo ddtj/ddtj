@@ -30,7 +30,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-@Command(name = "ddtj", mixinStandardHelpOptions = true, version = "0.0.3",
+@Command(name = "ddtj", mixinStandardHelpOptions = true, version = "0.0.4",
         description = "DDT: It kills bugs", helpCommand = true,
         abbreviateSynopsis = true)
 public class Main implements Callable<Integer> {
@@ -87,6 +87,15 @@ public class Main implements Callable<Integer> {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             return response.statusCode() == 200 ? 0 : response.statusCode();
+        }
+
+        if(listClasses) {
+            HttpRequest request = HttpRequest.newBuilder(URI.create(baseUrl + "/classes")).GET()
+                    .build();
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
+            return 0;
         }
 
         cmd.usage(System.err);

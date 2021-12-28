@@ -17,6 +17,7 @@
  */
 package dev.ddtj.backend.data;
 
+import dev.ddtj.backend.data.objectmodel.BaseType;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -26,8 +27,13 @@ import lombok.Setter;
 
 @Data
 public class ParentMethod {
+    private boolean initializationFailure;
+    private ParentClass parentClass;
     private String signature;
-    private MethodParameter[] parameters;
+    private String name;
+    private BaseType[] parameters;
+    private BaseType returnValue;
+    private boolean applicable;
 
     @Setter(AccessLevel.PACKAGE)
     @Getter(AccessLevel.PACKAGE)
@@ -43,5 +49,9 @@ public class ParentMethod {
 
     public synchronized List<Invocation> listInvocations() {
         return new ArrayList<>(invocations.size());
+    }
+
+    public String fullName() {
+        return name + signature;
     }
 }

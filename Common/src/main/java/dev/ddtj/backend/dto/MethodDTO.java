@@ -21,6 +21,6 @@ import lombok.Data;
 
 @Data
 public class MethodDTO {
-    private String signature;
+    private String fullName;
     private int totalExecutions;
 }

@@ -15,44 +15,8 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dev.ddtj.backend.data;
+package dev.ddtj.backend.data.objectmodel;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
-@Data
-public class ParentClass {
-    private String name;
-
-    @Setter(AccessLevel.PACKAGE)
-    @Getter(AccessLevel.PACKAGE)
-    private Set<ParentMethod> methods = new TreeSet<>(Comparator.comparing(ParentMethod::fullName));
-
-    public synchronized List<ParentMethod> listMethods() {
-        return new ArrayList<>(methods);
-    }
-
-    public synchronized void addMethod(ParentMethod method) {
-        methods.add(method);
-    }
-
-    public synchronized int countTotalExecutions() {
-        return methods.stream().mapToInt(ParentMethod::getInvocationCount).sum();
-    }
-
-    public synchronized int getMethodCount() {
-        return methods.size();
-    }
-
-    public synchronized ParentMethod findMethod(String fullName) {
-        return methods.stream().filter(m -> m.fullName().equals(fullName)).findFirst()
-                .orElse(null);
-    }
+public interface ArrayCreation {
+    Object allocateArray(int size);
 }

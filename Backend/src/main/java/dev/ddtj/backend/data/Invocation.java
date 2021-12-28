@@ -17,7 +17,6 @@
  */
 package dev.ddtj.backend.data;
 
-import java.util.List;
 import lombok.Data;
 
 @Data
@@ -26,6 +25,7 @@ public class Invocation {
     private long time;
     private Object[] arguments;
     private Object result;
-    private List<MockInvocation> mockInvocations;
     private String thrownException;
+    private long threadId;
+    private ParentMethod[] stack;
 }

@@ -15,12 +15,36 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dev.ddtj.backend.data;
+package dev.ddtj.backend.data.objectmodel;
 
-import lombok.Data;
+import com.sun.jdi.ArrayReference;
+import com.sun.jdi.Value;
 
-@Data
-public class MethodParameter {
-    private String type;
-    private String name;
+/**
+ * At the moment only 1d arrays are supported. I'm not sure what's the "right approach" to support multidimensional
+ * arrays.
+ */
+
+public class ArrayObjectOrPrimitiveType extends BaseType {
+    private final BaseType elementType;
+    protected ArrayObjectOrPrimitiveType(String type, BaseType elementType) {
+        super(type);
+        this.elementType = elementType;
+    }
+
+    @Override
+    public Object getValue(Value value) {
+        ArrayReference arrayReference = (ArrayReference) value;
+        int length = arrayReference.length();
+        Object array = allocateArray(length);
+        for (int i = 0; i < length; i++) {
+            elementType.setArrayValue(array, i, arrayReference.getValue(i));
+        }
+        return null;
+    }
+
+    @Override
+    public Object allocateArray(int size) {
+        return elementType.allocateArray(size);
+    }
 }

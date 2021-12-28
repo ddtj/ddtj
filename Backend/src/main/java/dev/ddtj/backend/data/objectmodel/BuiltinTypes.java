@@ -15,14 +15,34 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dev.ddtj.backend.data;
+package dev.ddtj.backend.data.objectmodel;
 
-import lombok.Data;
+import com.sun.jdi.StringReference;
+import com.sun.jdi.Value;
 
-@Data
-public class MockInvocation {
-  private ParentClass parentClass;
-  private ParentMethod parentMethod;
-  private Object[] arguments;
-  private Object returnValue;
+/**
+ * Support for common builtin types to make their handling and code generation feel smoother
+ */
+public class BuiltinTypes extends BaseType {
+    private final BaseTypeInterface value;
+    private final ArrayCreation arrayCreation;
+    public static final BuiltinTypes STRING = new BuiltinTypes(String.class.getName(), val -> ((StringReference)val).value(),
+            String[]::new);
+
+
+    private BuiltinTypes(String type, BaseTypeInterface value, ArrayCreation arrayCreation) {
+        super(type);
+        this.value = value;
+        this.arrayCreation = arrayCreation;
+    }
+
+    @Override
+    public Object getValue(Value value) {
+        return this.value.getValue(value);
+    }
+
+    @Override
+    public Object allocateArray(int size) {
+        return arrayCreation.allocateArray(size);
+    }
 }
