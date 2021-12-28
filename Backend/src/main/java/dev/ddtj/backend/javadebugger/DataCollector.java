@@ -63,6 +63,7 @@ public class DataCollector {
 
     @Async
     public void collect(MonitoredSession session) {
+        long startTime = System.currentTimeMillis();
         try {
             long invocation = 1;
             session.setSessionId(shortUUID());
@@ -90,7 +91,7 @@ public class DataCollector {
                     eventSet = session.getVirtualMachine().eventQueue().remove(100);
                 }
             }
-            log.fine("VM Loop Exiting");
+            log.fine("VM Loop Exiting after " + (System.currentTimeMillis() - startTime) + "ms");
         } catch (InterruptedException e) {
             log.log(Level.SEVERE,"Interrupted while waiting for event queue", e);
 

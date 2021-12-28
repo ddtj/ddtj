@@ -56,15 +56,11 @@ public class ConnectSession {
             VirtualMachine vm = connector.launch(env);
 
             if(vmdto.getFilter() == null || vmdto.getFilter().isBlank()) {
-                vmdto.setFilter(vmdto.getMain().substring(vmdto.getMain().lastIndexOf('.') + 1) + "*");
+                vmdto.setFilter(vmdto.getMain().substring(0, vmdto.getMain().lastIndexOf('.') + 1) + "*");
             }
-            MethodEntryRequest methodEntryRequest = vm.eventRequestManager().createMethodEntryRequest();
-            methodEntryRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-            methodEntryRequest.enable();
 
-            MethodExitRequest methodExitRequest = vm.eventRequestManager().createMethodExitRequest();
-            methodExitRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-            methodExitRequest.enable();
+            bindMethodEvents(vmdto.getFilter(), vm);
+            bindMethodEvents("javax.*", vm);
 
             VMDeathRequest vmDeathRequest = vm.eventRequestManager().createVMDeathRequest();
             vmDeathRequest.setSuspendPolicy(EventRequest.SUSPEND_ALL);
@@ -77,5 +73,17 @@ public class ConnectSession {
             log.severe("Failed to connect to " + vmdto.getMain() + ": " + e);
             throw new IOException(e);
         }
+    }
+
+    private void bindMethodEvents(String whitelistEntry, VirtualMachine vm) {
+        MethodEntryRequest methodEntryRequest = vm.eventRequestManager().createMethodEntryRequest();
+        methodEntryRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+        methodEntryRequest.addClassFilter(whitelistEntry);
+        methodEntryRequest.enable();
+
+        MethodExitRequest methodExitRequest = vm.eventRequestManager().createMethodExitRequest();
+        methodExitRequest.addClassFilter(whitelistEntry);
+        methodExitRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+        methodExitRequest.enable();
     }
 }
