@@ -58,6 +58,35 @@ class TestGeneratorTests {
     @Test
     void testGeneratorTest() throws ClassNotLoadedException, AbsentInformationException {
         Mockito.when(integerType.name()).thenReturn("int");
+        ParentClass parentClass = new ParentClass();
+        ParentMethod parentMethod = new ParentMethod();
+        Invocation invocation = new Invocation();
+
+        initMethodCall(parentClass, parentMethod, invocation);
+
+        ParentClass otherClass = new ParentClass();
+        ParentMethod otherMethod = new ParentMethod();
+        Invocation otherInvocation = new Invocation();
+        initMethodCall(otherClass, otherMethod, otherInvocation);
+        otherInvocation.setStack(new ParentMethod[]{parentMethod, otherMethod});
+        otherMethod.setName("otherMethod");
+
+        List<Invocation> internalCalls = List.of(otherInvocation);
+        TestGenerator testGenerator = new TestGenerator(parentClass, parentMethod, invocation, internalCalls);
+        Set<String> imports = testGenerator.getCustomImports();
+        List<String> mocks = testGenerator.getMocks();
+        List<String> argumentInitialization = testGenerator.getArgumentInitialization();
+        String arguments = testGenerator.getArguments();
+
+        List<String> creationCode = testGenerator.getCreationCode();
+        assertEquals(1, creationCode.size());
+        assertEquals("ClassName myObjectInstance = new ClassName();", creationCode.get(0));
+
+        String methodName = testGenerator.getMethodName();
+        assertEquals("test", methodName);
+    }
+
+    private void initMethodCall(ParentClass parentClass, ParentMethod parentMethod, Invocation invocation) throws ClassNotLoadedException, AbsentInformationException {
         List<Field> fields = Arrays.asList(ObjectTypeTests.create("field1", integerType),
                 ObjectTypeTests.create("field2", integerType));
 
@@ -69,10 +98,8 @@ class TestGeneratorTests {
         ReferenceType referenceType = ObjectTypeTests.createClass(methods, fields);
         ObjectType settersType = ObjectType.create(referenceType);
 
-        ParentClass parentClass = new ParentClass();
         parentClass.setName(BasicApp.class.getName());
         parentClass.setObjectType(settersType);
-        ParentMethod parentMethod = new ParentMethod();
         parentClass.addMethod(parentMethod);
         parentMethod.setParentClass(parentClass);
 
@@ -88,26 +115,11 @@ class TestGeneratorTests {
         parentMethod.setReturnType(PrimitiveAndWrapperType.VOID);
         parentMethod.setApplicable(true);
 
-        Invocation invocation = new Invocation();
         parentMethod.addInvocation(invocation);
         invocation.setFields(new Object[0]);
         invocation.setTime(System.currentTimeMillis() - 500);
         invocation.setEndTime(System.currentTimeMillis());
         invocation.setThreadId(1);
         invocation.setArguments(new Object[] { 1, new int[] { 2 },  new int[0]});
-
-        List<Invocation> internalCalls = new ArrayList<>();
-        TestGenerator testGenerator = new TestGenerator(parentClass, parentMethod, invocation, internalCalls);
-        Set<String> imports = testGenerator.getCustomImports();
-        List<String> mocks = testGenerator.getMocks();
-        List<String> argumentInitialization = testGenerator.getArgumentInitialization();
-        String arguments = testGenerator.getArguments();
-
-        List<String> creationCode = testGenerator.getCreationCode();
-        assertEquals(1, creationCode.size());
-        assertEquals("ClassName myObjectInstance = new ClassName();", creationCode.get(0));
-
-        String methodName = testGenerator.getMethodName();
-        assertEquals("test", methodName);
     }
 }

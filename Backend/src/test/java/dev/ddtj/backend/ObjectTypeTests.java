@@ -91,6 +91,11 @@ class ObjectTypeTests {
         Mockito.when(value.value()).thenReturn(1);
         settersType.getValue(object);
 
+        assertEquals(2, settersType.getFieldValues(object).length);
+
+        assertEquals("x", settersType.getCodeRepresentation("x", null));
+        assertEquals("field1", settersType.getFieldName(0));
+
         assertEquals(5, Array.getLength(settersType.allocateArray(5)));
 
         type = createClass(methods.subList(0, 1), fields);
