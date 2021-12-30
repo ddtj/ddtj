@@ -28,10 +28,6 @@ import org.springframework.web.servlet.ModelAndView;
 @RestController
 public class GeneratorController {
     private final MainService mainService;
-    public static final String CLASS_FULL_NAME = "classFullName";
-    public static final String CLASS_NAME = "className";
-    public static final String CUSTOM_IMPORTS = "customImports";
-    public static final String SETTERS_INITIALIZATION = "settersInitialization";
 
     public GeneratorController(MainService mainService) {
         this.mainService = mainService;

@@ -27,9 +27,7 @@ import dev.ddtj.backend.dto.VMDTO;
 import dev.ddtj.backend.javadebugger.ConnectSession;
 import dev.ddtj.backend.javadebugger.MonitoredSession;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 

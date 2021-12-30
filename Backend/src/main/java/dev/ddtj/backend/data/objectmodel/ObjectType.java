@@ -37,6 +37,10 @@ import lombok.extern.java.Log;
 
 @Log
 public class ObjectType extends BaseType {
+
+    public static final String MOCKITO_MOCK = " = Mockito.mock(";
+    public static final String DOT_CLASS_SUFFIX = ".class);";
+
     public enum CreationType {
         CONSTRUCTOR_FACTORY,
         SETTERS,
@@ -258,45 +262,53 @@ public class ObjectType extends BaseType {
         String shortName = getShortTypeName();
         if(canObjectBeCreated()) {
             List<String> result = new ArrayList<>();
-            result.add(shortName + " " + fieldName + " =  new " + shortName + "();");
+            result.add(shortName + " " + fieldName + " = new " + shortName + "();");
             Map<String, Object> fieldValues = (Map<String, Object>) fieldValue;
             if(creationType == CreationType.SETTERS) {
-                for (int iter = 0; iter < supportedFields.length; iter++) {
-                    if (fieldBaseTypes[iter] instanceof ObjectType) {
-                        String fieldShortName = fieldBaseTypes[iter].getShortTypeName();
-                        result.add(fieldShortName + " " + supportedFields[iter] +
-                                " = Mockito.mock(" + fieldShortName + ".class);");
-                        result.add(fieldName + "." + setterMethods[iter] + "(" + supportedFields[iter] + ");");
-                        continue;
-                    }
-                    Object value = fieldValues.get(supportedFields[iter]);
-                    if (value != null) {
-                        result.add(fieldName + "." + setterMethods[iter] + "(" +
-                                fieldBaseTypes[iter].getCodeRepresentation(supportedFields[iter], value) + ");");
-                    }
-                }
+                getCodePrefixSetters(fieldName, result, fieldValues);
             } else {
-                result.add(shortName + " " + fieldName + " =  new " + shortName + "(");
-                for (int iter = 0; iter < supportedFields.length; iter++) {
-                    if (fieldBaseTypes[iter] instanceof ObjectType) {
-                        String fieldShortName = fieldBaseTypes[iter].getShortTypeName();
-                        result.add(1, fieldShortName + " " + supportedFields[iter] +
-                                " = Mockito.mock(" + fieldShortName + ".class);");
-                        result.add(supportedFields[iter] + (iter < supportedFields.length - 1 ? ", " : ""));
-                        continue;
-                    }
-                    Object value = fieldValues.get(supportedFields[iter]);
-                    if (value != null) {
-                        result.add(fieldBaseTypes[iter].getCodeRepresentation(supportedFields[iter], value) +
-                                (iter < supportedFields.length - 1 ? ", " : ""));
-                    }
-                }
-                result.add("        );");
+                getCodePrefixConstructor(fieldName, shortName, result, fieldValues);
             }
             return result;
         } else {
             // TODO: We might need to inject some values into the mock here
             return List.of(shortName + " " + fieldName + " = Mockito.mock(" + shortName + ".class);");
+        }
+    }
+
+    private void getCodePrefixConstructor(String fieldName, String shortName, List<String> result, Map<String, Object> fieldValues) {
+        result.add(shortName + " " + fieldName + " =  new " + shortName + "(");
+        for (int iter = 0; iter < supportedFields.length; iter++) {
+            if (fieldBaseTypes[iter] instanceof ObjectType) {
+                String fieldShortName = fieldBaseTypes[iter].getShortTypeName();
+                result.add(1, fieldShortName + " " + supportedFields[iter] +
+                        MOCKITO_MOCK + fieldShortName + DOT_CLASS_SUFFIX);
+                result.add(supportedFields[iter] + (iter < supportedFields.length - 1 ? ", " : ""));
+                continue;
+            }
+            Object value = fieldValues.get(supportedFields[iter]);
+            if (value != null) {
+                result.add(fieldBaseTypes[iter].getCodeRepresentation(supportedFields[iter], value) +
+                        (iter < supportedFields.length - 1 ? ", " : ""));
+            }
+        }
+        result.add("        );");
+    }
+
+    private void getCodePrefixSetters(String fieldName, List<String> result, Map<String, Object> fieldValues) {
+        for (int iter = 0; iter < supportedFields.length; iter++) {
+            if (fieldBaseTypes[iter] instanceof ObjectType) {
+                String fieldShortName = fieldBaseTypes[iter].getShortTypeName();
+                result.add(fieldShortName + " " + supportedFields[iter] +
+                        MOCKITO_MOCK + fieldShortName + DOT_CLASS_SUFFIX);
+                result.add(fieldName + "." + setterMethods[iter] + "(" + supportedFields[iter] + ");");
+                continue;
+            }
+            Object value = fieldValues.get(supportedFields[iter]);
+            if (value != null) {
+                result.add(fieldName + "." + setterMethods[iter] + "(" +
+                        fieldBaseTypes[iter].getCodeRepresentation(supportedFields[iter], value) + ");");
+            }
         }
     }
 

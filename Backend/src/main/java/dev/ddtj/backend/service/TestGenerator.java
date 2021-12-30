@@ -53,15 +53,16 @@ public class TestGenerator {
     }
 
     public Set<String> getCustomImports() {
-        Set<String> imports = internalCalls.stream().map(invocation -> invocation.getStack()[0].getParentClass().getName())
+        Set<String> imports = internalCalls.stream().map(inv -> inv.getStack()[0].getParentClass().getName())
                 .collect(Collectors.toSet());
+        imports.add(parentClass.getName());
         imports.addAll(mockedClassSet());
         return imports;
     }
 
     private Set<String> mockedClassSet() {
         return internalCalls.stream()
-                .map(invocation -> invocation.getStack()[0].getParentClass().getName())
+                .map(inv -> inv.getStack()[0].getParentClass().getName())
                 .collect(Collectors.toSet());
     }
 
@@ -72,16 +73,16 @@ public class TestGenerator {
             String shortName = mockClass.substring(mockClass.lastIndexOf('.') + 1);
             mocks.add(shortName + " " + shortName + "Mock = Mockito.mock(" + shortName + ".class);");
         }
-        for(Invocation invocation : internalCalls) {
-            ParentMethod method = invocation.getStack()[0];
+        for(Invocation currentInvocation : internalCalls) {
+            ParentMethod method = currentInvocation.getStack()[0];
             if(method.getReturnType() != PrimitiveAndWrapperType.VOID) {
-                mocks.addAll(getArgumentInitialization(method, invocation.getArguments()));
-                method.getReturnType().getCodePrefix(method.getName() + "ReturnValue", invocation.getResult());
+                mocks.addAll(getArgumentInitialization(method, currentInvocation.getArguments()));
+                method.getReturnType().getCodePrefix(method.getName() + "ReturnValue", currentInvocation.getResult());
                 String shortName = method.getParentClass().getName();
                 shortName = shortName.substring(shortName.lastIndexOf('.') + 1);
-                mocks.add("Mockito.lenient().when(" + shortName + "Mock." + invocation.getStack()[0].getName() + "(" +
-                        getArguments(method, invocation.getArguments()) + ")).thenReturn(" +
-                        method.getReturnType().getCodeRepresentation("", invocation.getResult()) + ");");
+                mocks.add("Mockito.lenient().when(" + shortName + "Mock." + currentInvocation.getStack()[0].getName() + "(" +
+                        getArguments(method, currentInvocation.getArguments()) + ")).thenReturn(" +
+                        method.getReturnType().getCodeRepresentation("", currentInvocation.getResult()) + ");");
             }
         }
         return mocks;
@@ -102,25 +103,25 @@ public class TestGenerator {
     }
 
     public List<String> getArgumentInitialization() {
-        return getArgumentInitialization(parentMethod, invocation.getFields());
+        return getArgumentInitialization(parentMethod, invocation.getArguments());
     }
 
     private String getArguments(ParentMethod parentMethod, Object[] arguments) {
         BaseType[] baseTypes = parentMethod.getParameters();
-        String returnValue = "";
+        StringBuilder returnValue = new StringBuilder();
         for(int iter = 0 ; iter < baseTypes.length ; iter++) {
             BaseType type = baseTypes[iter];
-            returnValue += type.getCodeRepresentation(parentMethod.getName() + "Arg" + (iter + 1),
-                    arguments[iter]);
+            returnValue.append(type.getCodeRepresentation(parentMethod.getName() + "Arg" + (iter + 1),
+                    arguments[iter]));
             if(iter < baseTypes.length - 1) {
-                returnValue += ", ";
+                returnValue.append(", ");
             }
         }
-        return returnValue;
+        return returnValue.toString();
     }
 
     public String getArguments() {
-        return getArguments(parentMethod, invocation.getFields());
+        return getArguments(parentMethod, invocation.getArguments());
     }
 
     public String getMethodName() {

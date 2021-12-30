@@ -57,14 +57,14 @@ public class ArrayObjectOrPrimitiveType extends BaseType {
             return "new " + getType() + "[0]";
         }
         if(arrayLength < 10 && !(elementType instanceof ObjectType)) {
-            String alloc = "new " + getType() + "[] {";
+            StringBuilder alloc = new StringBuilder("new ").append(getType()).append("[] {");
             for(int i = 0; i < arrayLength; i++) {
-                alloc += elementType.getCodeRepresentation(fieldName, Array.get(fieldValue, i));
+                alloc.append(elementType.getCodeRepresentation(fieldName, Array.get(fieldValue, i)));
                 if(i < arrayLength - 1) {
-                    alloc += ", ";
+                    alloc.append(", ");
                 }
             }
-            return alloc + "}";
+            return alloc.append("}").toString();
         }
         return fieldName;
     }
