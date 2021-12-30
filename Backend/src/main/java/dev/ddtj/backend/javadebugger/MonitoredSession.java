@@ -27,12 +27,16 @@ import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.event.MethodEntryEvent;
 import com.sun.jdi.event.MethodExitEvent;
 import dev.ddtj.backend.data.ExecutionState;
+import dev.ddtj.backend.data.Invocation;
 import dev.ddtj.backend.data.ParentClass;
 import dev.ddtj.backend.data.ParentMethod;
 import dev.ddtj.backend.data.objectmodel.BaseType;
+import dev.ddtj.backend.data.objectmodel.ObjectType;
 import dev.ddtj.backend.data.objectmodel.TypeFactory;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.extern.java.Log;
 
@@ -50,6 +54,7 @@ public class MonitoredSession {
             "sun."
     };
     private final Map<String, ExecutionState> pendingExecutions = new HashMap<>();
+    private final Map<Long, List<Invocation>> invocationList = new HashMap<>();
 
     public MonitoredSession(VirtualMachine virtualMachine, String filter) {
         this.virtualMachine = virtualMachine;
@@ -92,11 +97,11 @@ public class MonitoredSession {
         try {
             if(method.isNative() || method.isStaticInitializer()) {
                 parentMethod.setParameters(new BaseType[0]);
-                parentMethod.setReturnValue(TypeFactory.create(method.returnType()));
+                parentMethod.setReturnType(TypeFactory.create(method.returnType()));
             } else {
                 BaseType[] parameters = TypeFactory.create(method.argumentTypes());
                 parentMethod.setParameters(parameters);
-                parentMethod.setReturnValue(TypeFactory.create(method.returnType()));
+                parentMethod.setReturnType(TypeFactory.create(method.returnType()));
             }
         } catch (ClassNotLoadedException classNotLoadedException) {
             log.info("Type in argument or return value isn't loaded yet: " + method.argumentTypeNames() +
@@ -117,6 +122,7 @@ public class MonitoredSession {
             if (parentClass == null) {
                 parentClass = new ParentClass();
                 parentClass.setName(className);
+                parentClass.setObjectType((ObjectType)TypeFactory.create(method.declaringType()));
                 ParentMethod parentMethod = createMethod(parentClass, methodSignature, method);
                 parentClass.addMethod(parentMethod);
                 parentClassMap.put(className, parentClass);
@@ -193,5 +199,14 @@ public class MonitoredSession {
             stringBuilder.append(method.signature());
         }
         return stringBuilder.toString();
+    }
+
+    public synchronized void addInvocation(Invocation invocation) {
+        invocationList.computeIfAbsent(invocation.getThreadId(), k -> new ArrayList<>())
+                .add(invocation);
+    }
+
+    public synchronized List<Invocation> getInvocationList(long threadId) {
+        return new ArrayList<>(invocationList.get(threadId));
     }
 }

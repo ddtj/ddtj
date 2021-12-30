@@ -21,9 +21,13 @@ import lombok.Data;
 
 @Data
 public class Invocation {
+    public static final Object[] EMPTY_ARRAY = new Object[0];
+
     private String id;
     private long time;
+    private long endTime;
     private Object[] arguments;
+    private Object[] fields;
     private Object result;
     private String thrownException;
     private long threadId;

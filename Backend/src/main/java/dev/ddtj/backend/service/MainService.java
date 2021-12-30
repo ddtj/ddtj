@@ -17,6 +17,7 @@
  */
 package dev.ddtj.backend.service;
 
+import dev.ddtj.backend.data.Invocation;
 import dev.ddtj.backend.data.ParentClass;
 import dev.ddtj.backend.data.ParentMethod;
 import dev.ddtj.backend.dto.ClassDTO;
@@ -26,7 +27,9 @@ import dev.ddtj.backend.dto.VMDTO;
 import dev.ddtj.backend.javadebugger.ConnectSession;
 import dev.ddtj.backend.javadebugger.MonitoredSession;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +38,7 @@ public class MainService {
     private final ConnectSession connectSession;
 
     /**
-     * We don't need clustering and we don't need to use a database.
+     * We don't need clustering, and we don't need to use a database.
      * I might replace this with a map to support concurrently running multiple apps
      * but for now just storing the current session as a field will do.
      */
@@ -98,5 +101,17 @@ public class MainService {
             testTimeDTO.setId(invocation.getId());
             return testTimeDTO;
         }).collect(Collectors.toList());
+    }
+
+    public TestGenerator generateTest(String className, String method, String testId) {
+        ParentClass parentClass = session.getClass(className);
+        ParentMethod parentMethod = parentClass.findMethod(method);
+        Invocation invocation = parentMethod.findInvocation(testId);
+
+        List<Invocation> internalCalls = session.getInvocationList(invocation.getThreadId()).stream()
+                .filter(i -> i.getTime() >= invocation.getTime() && i.getTime() <= invocation.getEndTime() && i != invocation)
+                .collect(Collectors.toList());
+
+        return new TestGenerator(parentClass, parentMethod, invocation, internalCalls);
     }
 }

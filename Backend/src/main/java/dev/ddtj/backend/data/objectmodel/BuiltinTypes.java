@@ -23,11 +23,16 @@ import com.sun.jdi.Value;
 /**
  * Support for common builtin types to make their handling and code generation feel smoother
  */
-public class BuiltinTypes extends BaseType {
+public abstract class BuiltinTypes extends BaseType {
     private final BaseTypeInterface value;
     private final ArrayCreation arrayCreation;
-    public static final BuiltinTypes STRING = new BuiltinTypes(String.class.getName(), val -> ((StringReference)val).value(),
-            String[]::new);
+    public static final BuiltinTypes STRING = new BuiltinTypes(String.class.getName(), val -> ((StringReference) val).value(),
+            String[]::new) {
+        @Override
+        public String getCodeRepresentation(String fieldName, Object fieldValue) {
+            return "\"" + fieldValue + "\"";
+        }
+    };
 
 
     private BuiltinTypes(String type, BaseTypeInterface value, ArrayCreation arrayCreation) {

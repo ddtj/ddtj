@@ -10,8 +10,10 @@ import com.sun.jdi.ThreadReference;
 import com.sun.jdi.event.MethodEntryEvent;
 import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.event.VMDeathEvent;
+import dev.ddtj.backend.data.ParentClass;
 import dev.ddtj.backend.data.ParentMethod;
 import dev.ddtj.backend.data.objectmodel.BaseType;
+import dev.ddtj.backend.data.objectmodel.ObjectType;
 import dev.ddtj.backend.javadebugger.DataCollector;
 import dev.ddtj.backend.javadebugger.MonitoredSession;
 import java.util.Collections;
@@ -71,6 +73,11 @@ class DataCollectorTests {
         Mockito.when(declaringType.name()).thenReturn("com.company.ClassName");
         Mockito.when(monitoredSession.getOrCreateMethod(method)).thenReturn(parentMethod);
         Mockito.when(parentMethod.getParameters()).thenReturn(new BaseType[0]);
+
+        ObjectType objectType = ObjectType.create(declaringType);
+        ParentClass parentClass = new ParentClass();
+        parentClass.setObjectType(objectType);
+        Mockito.when(parentMethod.getParentClass()).thenReturn(parentClass);
 
         Mockito.when(methodEntryEvent.thread()).thenReturn(threadReference);
         Mockito.when(threadReference.frameCount()).thenReturn(1);

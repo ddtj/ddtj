@@ -68,7 +68,7 @@ class MainServiceTests {
         assertEquals(0, methodDTOS.size());
 
         List<TestTimeDTO> testTimeDTOS = mainService.listInvocations(PARENT_CLASS.getName(), PARENT_METHOD.fullName());
-        assertEquals(0, testTimeDTOS.size());
+        assertEquals(2, testTimeDTOS.size());
     }
 
     private void initLombok() {

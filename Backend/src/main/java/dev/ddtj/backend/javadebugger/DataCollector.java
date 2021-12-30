@@ -19,6 +19,7 @@ package dev.ddtj.backend.javadebugger;
 
 import com.sun.jdi.IncompatibleThreadStateException;
 import com.sun.jdi.Method;
+import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.Value;
 import com.sun.jdi.event.Event;
@@ -26,11 +27,11 @@ import com.sun.jdi.event.EventSet;
 import com.sun.jdi.event.MethodEntryEvent;
 import com.sun.jdi.event.MethodExitEvent;
 import com.sun.jdi.event.VMDeathEvent;
-import com.sun.jdi.request.MethodExitRequest;
 import dev.ddtj.backend.data.ExecutionState;
 import dev.ddtj.backend.data.Invocation;
 import dev.ddtj.backend.data.ParentMethod;
 import dev.ddtj.backend.data.objectmodel.BaseType;
+import dev.ddtj.backend.data.objectmodel.ObjectType;
 import dev.ddtj.backend.data.objectmodel.PrimitiveAndWrapperType;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
@@ -117,10 +118,12 @@ public class DataCollector {
                 ParentMethod parentMethod = executionState.getParentMethod();
                 session.validateMethod(currentMethod, parentMethod);
                 Invocation invocation = executionState.getInvocation();
-                if (parentMethod.getReturnValue() != PrimitiveAndWrapperType.VOID) {
-                    invocation.setResult(parentMethod.getReturnValue().getValue(methodExitEvent.returnValue()));
+                if (parentMethod.getReturnType() != PrimitiveAndWrapperType.VOID) {
+                    invocation.setResult(parentMethod.getReturnType().getValue(methodExitEvent.returnValue()));
                 }
+                invocation.setEndTime(System.currentTimeMillis());
                 parentMethod.addInvocation(invocation);
+                session.addInvocation(invocation);
             }
         } catch (IncompatibleThreadStateException e) {
             log.log(Level.SEVERE,"Incompatible thread state", e);
@@ -156,6 +159,14 @@ public class DataCollector {
         List<Value> valueList = threadReference.frame(0).getArgumentValues();
         Object[] arguments = convertArgumentsToArray(parent, valueList);
         invocation.setArguments(arguments);
+
+        ObjectReference thisObject = threadReference.frame(0).thisObject();
+        ObjectType thisObjectType = parent.getParentClass().getObjectType();
+        if(thisObjectType.canObjectBeCreated()) {
+            invocation.setFields(thisObjectType.getFieldValues(thisObject));
+        } else {
+            invocation.setFields(Invocation.EMPTY_ARRAY);
+        }
 
         invocation.setId(session.getSessionId() + invocationCount);
 

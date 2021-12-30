@@ -17,6 +17,7 @@
  */
 package dev.ddtj.backend.data;
 
+import dev.ddtj.backend.data.objectmodel.ObjectType;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -35,6 +36,7 @@ public class ParentClass {
     @Getter(AccessLevel.PACKAGE)
     private Set<ParentMethod> methods = new TreeSet<>(Comparator.comparing(ParentMethod::fullName));
 
+    private ObjectType objectType;
     public synchronized List<ParentMethod> listMethods() {
         return new ArrayList<>(methods);
     }
