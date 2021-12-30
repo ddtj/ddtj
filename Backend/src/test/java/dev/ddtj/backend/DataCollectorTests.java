@@ -9,13 +9,14 @@ import com.sun.jdi.StringReference;
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.event.MethodEntryEvent;
 import com.sun.jdi.event.MethodExitEvent;
-import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.event.VMDeathEvent;
 import dev.ddtj.backend.data.ExecutionState;
 import dev.ddtj.backend.data.Invocation;
+import dev.ddtj.backend.data.ParentClass;
 import dev.ddtj.backend.data.ParentMethod;
 import dev.ddtj.backend.data.objectmodel.BaseType;
 import dev.ddtj.backend.data.objectmodel.BuiltinTypes;
+import dev.ddtj.backend.data.objectmodel.ObjectType;
 import dev.ddtj.backend.javadebugger.DataCollector;
 import dev.ddtj.backend.javadebugger.MonitoredSession;
 import java.util.Collections;
@@ -75,7 +76,7 @@ class DataCollectorTests {
         Mockito.when(method.isPrivate()).thenReturn(false);
         Mockito.when(method.isProtected()).thenReturn(false);
         Mockito.when(method.isPackagePrivate()).thenReturn(false);
-        Mockito.when(parentMethod.getReturnValue()).thenReturn(BuiltinTypes.STRING);
+        Mockito.when(parentMethod.getReturnType()).thenReturn(BuiltinTypes.STRING);
         Mockito.when(declaringType.name()).thenReturn("com.company.ClassName");
         Mockito.when(monitoredSession.getOrCreateMethod(method)).thenReturn(parentMethod);
         ExecutionState executionState = new ExecutionState();
@@ -84,6 +85,11 @@ class DataCollectorTests {
 
         Mockito.when(monitoredSession.removeExecutionState(methodExitEvent)).thenReturn(executionState);
         Mockito.when(parentMethod.getParameters()).thenReturn(new BaseType[0]);
+
+        ObjectType objectType = ObjectType.create(declaringType);
+        ParentClass parentClass = new ParentClass();
+        parentClass.setObjectType(objectType);
+        Mockito.when(parentMethod.getParentClass()).thenReturn(parentClass);
 
         Mockito.when(methodEntryEvent.thread()).thenReturn(threadReference);
         Mockito.when(methodExitEvent.returnValue()).thenReturn(stringValue);

@@ -18,7 +18,7 @@
 package dev.ddtj.backend;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.sun.jdi.AbsentInformationException;
@@ -32,12 +32,13 @@ import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.StackFrame;
 import com.sun.jdi.Type;
+import com.sun.jdi.Value;
 import com.sun.jdi.VirtualMachine;
-import dev.ddtj.backend.data.objectmodel.BaseType;
 import dev.ddtj.backend.data.objectmodel.ObjectType;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -73,14 +74,16 @@ class ObjectTypeTests {
         Field field2 = create("field2", integerType);
         List<Field> fields = Arrays.asList(field1, field2);
 
-        List<Method> methods = Arrays.asList(create("setField1", "void", "int"),
-                create("setField2", "int", "int"),
-                create("<init>", "void"));
+        List<Method> methods = Arrays.asList(create(integerType, "setField1", "void", "int"),
+                create(integerType, "setField2", "int", "int"),
+                create(integerType, "<init>", "void"));
 
         type = createClass(methods, fields);
         ObjectType settersType = ObjectType.create(type);
         assertEquals(ObjectType.CreationType.SETTERS, settersType.getCreationType());
         assertTrue(settersType.canObjectBeCreated());
+
+        testGetValue(field1, field2, settersType);
 
         assertEquals(5, Array.getLength(settersType.allocateArray(5)));
 
@@ -88,12 +91,40 @@ class ObjectTypeTests {
         assertEquals(ObjectType.CreationType.NO_VALID_CONSTRUCTOR, ObjectType.create(type).getCreationType());
 
         methods = Arrays.asList(
-                create("<init>", "void", "field1", "field2"));
+                create(integerType, "<init>", "void", "field1", "field2"));
         type = createClass(methods, fields);
-        assertEquals(ObjectType.CreationType.CONSTRUCTOR_FACTORY, ObjectType.create(type).getCreationType());
+        ObjectType constructorObjectType = ObjectType.create(type);
+        assertEquals(ObjectType.CreationType.CONSTRUCTOR_FACTORY, constructorObjectType.getCreationType());
+        testGetValue(field1, field2, constructorObjectType);
     }
 
-    private Field create(String name, Type type) throws ClassNotLoadedException {
+    private void testGetValue(Field field1, Field field2, ObjectType settersType) {
+        ObjectReference object = Mockito.mock(ObjectReference.class);
+        ReferenceType objectType = Mockito.mock(ReferenceType.class);
+        IntegerValue value = Mockito.mock(IntegerValue.class);
+        Mockito.when(object.referenceType()).thenReturn(objectType);
+        Mockito.when(object.getValue(field1)).thenReturn(value);
+        Mockito.when(object.getValue(field2)).thenReturn(value);
+        Mockito.when(objectType.fieldByName("field1")).thenReturn(field1);
+        Mockito.when(objectType.fieldByName("field2")).thenReturn(field2);
+        Mockito.when(value.value()).thenReturn(1);
+        settersType.getValue(object);
+
+        assertEquals(2, settersType.getFieldValues(object).length);
+
+        Map<String, Object> fieldsMap = new HashMap<>();
+        fieldsMap.put("field1", 1);
+        fieldsMap.put("field2", 1);
+        assertNotNull(settersType.getCodePrefix("field1", fieldsMap));
+
+        assertEquals("x", settersType.getCodeRepresentation("x", null));
+        assertEquals("field1", settersType.getFieldName(0));
+
+        settersType.getSetterMethods();
+        assertNotNull(settersType.getField(0));
+    }
+
+    public static Field create(String name, Type type) throws ClassNotLoadedException {
         Field field = Mockito.mock(Field.class);
         Mockito.when(field.name()).thenReturn(name);
         Mockito.when(field.typeName()).thenReturn("int");
@@ -101,7 +132,7 @@ class ObjectTypeTests {
         return field;
     }
 
-    private List<Type> createIntList(int count) {
+    private static List<Type> createIntList(IntegerType integerType, int count) {
         List<Type> types = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             types.add(integerType);
@@ -109,7 +140,7 @@ class ObjectTypeTests {
         return types;
     }
 
-    private List<String> createList(int count, String text) {
+    private static List<String> createList(int count, String text) {
         List<String> types = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             types.add(text);
@@ -117,7 +148,7 @@ class ObjectTypeTests {
         return types;
     }
 
-    private List<LocalVariable> createLocalVariables(String... args) {
+    private static List<LocalVariable> createLocalVariables(String... args) {
         List<LocalVariable> types = new ArrayList<>();
         for (String arg : args) {
             LocalVariable localVariable = new LocalVariable() {
@@ -171,18 +202,18 @@ class ObjectTypeTests {
         return types;
     }
 
-    private Method create(String name, String returnType, String... args) throws ClassNotLoadedException, AbsentInformationException {
+    public static Method create(IntegerType integerType, String name, String returnType, String... args) throws ClassNotLoadedException, AbsentInformationException {
         Method method = Mockito.mock(Method.class);
         Mockito.when(method.name()).thenReturn(name);
         Mockito.lenient().when(method.returnTypeName()).thenReturn(returnType);
-        Mockito.lenient().when(method.argumentTypes()).thenReturn(createIntList(args.length));
+        Mockito.lenient().when(method.argumentTypes()).thenReturn(createIntList(integerType, args.length));
         Mockito.when(method.argumentTypeNames()).thenReturn(createList(args.length, "int"));
         Mockito.lenient().when(method.arguments()).thenReturn(createLocalVariables(args));
         Mockito.when(method.isPublic()).thenReturn(true);
         return method;
     }
 
-    private ReferenceType createClass(List<Method> methodList, List<Field> fields) {
+    public static ReferenceType createClass(List<Method> methodList, List<Field> fields) {
         ReferenceType type = Mockito.mock(ReferenceType.class);
         Mockito.when(type.name()).thenReturn(CLASS_NAME);
         Mockito.when(type.methods()).thenReturn(methodList);

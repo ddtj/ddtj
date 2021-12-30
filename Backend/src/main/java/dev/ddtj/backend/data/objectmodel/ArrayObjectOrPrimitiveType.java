@@ -19,6 +19,8 @@ package dev.ddtj.backend.data.objectmodel;
 
 import com.sun.jdi.ArrayReference;
 import com.sun.jdi.Value;
+import java.lang.reflect.Array;
+import java.util.List;
 
 /**
  * At the moment only 1d arrays are supported. I'm not sure what's the "right approach" to support multidimensional
@@ -46,5 +48,34 @@ public class ArrayObjectOrPrimitiveType extends BaseType {
     @Override
     public Object allocateArray(int size) {
         return elementType.allocateArray(size);
+    }
+
+    @Override
+    public String getCodeRepresentation(String fieldName, Object fieldValue) {
+        int arrayLength = Array.getLength(fieldValue);
+        if(arrayLength == 0) {
+            return "new " + getType() + "[0]";
+        }
+        if(arrayLength < 10 && !(elementType instanceof ObjectType)) {
+            StringBuilder alloc = new StringBuilder("new ").append(getType()).append("[] {");
+            for(int i = 0; i < arrayLength; i++) {
+                alloc.append(elementType.getCodeRepresentation(fieldName, Array.get(fieldValue, i)));
+                if(i < arrayLength - 1) {
+                    alloc.append(", ");
+                }
+            }
+            return alloc.append("}").toString();
+        }
+        return fieldName;
+    }
+
+    @Override
+    public List<String> getCodePrefix(String fieldName, Object fieldValue) {
+        int arrayLength = Array.getLength(fieldValue);
+        if(arrayLength == 0 ||
+                (arrayLength < 10 && !(elementType instanceof ObjectType))) {
+            return null;
+        }
+        return super.getCodePrefix(fieldName, fieldValue);
     }
 }

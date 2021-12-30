@@ -69,11 +69,22 @@ public class PrimitiveAndWrapperType extends BaseType {
         public void setArrayValue(Object array, int index, Value value) {
             ((char[])array)[index] = ((CharValue)value).value();
         }
+
+        @Override
+        public String getCodeRepresentation(String fieldName, Object fieldValue) {
+            return "'" + fieldValue + "'";
+        }
     };
 
     public static final PrimitiveAndWrapperType CHARACTER_WRAPPER = new PrimitiveAndWrapperType(Character.class.getName(),
             true, v -> ((CharValue)v).value(),
-            Character[]::new);
+            Character[]::new) {
+
+        @Override
+        public String getCodeRepresentation(String fieldName, Object fieldValue) {
+            return "'" + fieldValue + "'";
+        }
+    };
 
     public static final PrimitiveAndWrapperType SHORT = new PrimitiveAndWrapperType("short", false,
             v -> ((ShortValue)v).value(),
@@ -108,11 +119,22 @@ public class PrimitiveAndWrapperType extends BaseType {
         public void setArrayValue(Object array, int index, Value value) {
             ((long[])array)[index] = ((LongValue)value).value();
         }
+
+        @Override
+        public String getCodeRepresentation(String fieldName, Object fieldValue) {
+            return fieldValue + "L";
+        }
     };
 
     public static final PrimitiveAndWrapperType LONG_WRAPPER = new PrimitiveAndWrapperType(Long.class.getName(),
             true, v -> ((LongValue)v).value(),
-            Long[]::new);
+            Long[]::new) {
+
+        @Override
+        public String getCodeRepresentation(String fieldName, Object fieldValue) {
+            return fieldValue + "L";
+        }
+    };
 
     public static final PrimitiveAndWrapperType FLOAT = new PrimitiveAndWrapperType("float", false,
             v -> ((FloatValue)v).value(),
@@ -121,11 +143,21 @@ public class PrimitiveAndWrapperType extends BaseType {
         public void setArrayValue(Object array, int index, Value value) {
             ((float[])array)[index] = ((FloatValue)value).value();
         }
+
+        @Override
+        public String getCodeRepresentation(String fieldName, Object fieldValue) {
+            return fieldValue + "f";
+        }
     };
 
     public static final PrimitiveAndWrapperType FLOAT_WRAPPER = new PrimitiveAndWrapperType(Float.class.getName(),
             true, v -> ((FloatValue)v).value(),
-            Float[]::new);
+            Float[]::new) {
+        @Override
+        public String getCodeRepresentation(String fieldName, Object fieldValue) {
+            return fieldValue + "L";
+        }
+    };
 
     public static final PrimitiveAndWrapperType DOUBLE = new PrimitiveAndWrapperType("double", false,
             v -> ((DoubleValue)v).value(),
@@ -162,5 +194,10 @@ public class PrimitiveAndWrapperType extends BaseType {
     @Override
     public Object allocateArray(int size) {
         return arrayCreation.allocateArray(size);
+    }
+
+    @Override
+    public String getCodeRepresentation(String fieldName, Object fieldValue) {
+        return fieldValue.toString();
     }
 }

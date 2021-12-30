@@ -17,6 +17,7 @@
  */
 package dev.ddtj.backend.service;
 
+import dev.ddtj.backend.data.Invocation;
 import dev.ddtj.backend.data.ParentClass;
 import dev.ddtj.backend.data.ParentMethod;
 import dev.ddtj.backend.dto.ClassDTO;
@@ -35,7 +36,7 @@ public class MainService {
     private final ConnectSession connectSession;
 
     /**
-     * We don't need clustering and we don't need to use a database.
+     * We don't need clustering, and we don't need to use a database.
      * I might replace this with a map to support concurrently running multiple apps
      * but for now just storing the current session as a field will do.
      */
@@ -98,5 +99,20 @@ public class MainService {
             testTimeDTO.setId(invocation.getId());
             return testTimeDTO;
         }).collect(Collectors.toList());
+    }
+
+    public TestGenerator generateTest(String className, String method, String testId) {
+        ParentClass parentClass = session.getClass(className);
+        ParentMethod parentMethod = parentClass.findMethod(method);
+        Invocation invocation = parentMethod.findInvocation(testId);
+        if(invocation == null) {
+            return null;
+        }
+
+        List<Invocation> internalCalls = session.getInvocationList(invocation.getThreadId()).stream()
+                .filter(i -> i.getTime() >= invocation.getTime() && i.getTime() <= invocation.getEndTime() && i != invocation)
+                .collect(Collectors.toList());
+
+        return new TestGenerator(parentClass, parentMethod, invocation, internalCalls);
     }
 }

@@ -32,7 +32,7 @@ public class ParentMethod {
     private String signature;
     private String name;
     private BaseType[] parameters;
-    private BaseType returnValue;
+    private BaseType returnType;
     private boolean applicable;
 
     @Setter(AccessLevel.PACKAGE)
@@ -48,7 +48,11 @@ public class ParentMethod {
     }
 
     public synchronized List<Invocation> listInvocations() {
-        return new ArrayList<>(invocations.size());
+        return new ArrayList<>(invocations);
+    }
+
+    public synchronized Invocation findInvocation(String id) {
+        return invocations.stream().filter(invocation -> invocation.getId().equals(id)).findFirst().orElse(null);
     }
 
     public String fullName() {

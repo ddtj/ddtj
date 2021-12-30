@@ -19,6 +19,7 @@ package dev.ddtj.backend.data.objectmodel;
 
 import com.sun.jdi.Value;
 import java.lang.reflect.Array;
+import java.util.List;
 
 public abstract class BaseType implements BaseTypeInterface, ArrayCreation {
   private final String type;
@@ -31,7 +32,18 @@ public abstract class BaseType implements BaseTypeInterface, ArrayCreation {
     return type;
   }
 
+  public String getShortTypeName() {
+    int index = type.lastIndexOf('.');
+    return index == -1 ? type : type.substring(index + 1);
+  }
+
   public void setArrayValue(Object array, int index, Value value) {
     Array.set(array, index, getValue(value));
+  }
+
+  public abstract String getCodeRepresentation(String fieldName, Object fieldValue);
+
+  public List<String> getCodePrefix(String fieldName, Object fieldValue) {
+    return null;
   }
 }

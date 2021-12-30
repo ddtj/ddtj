@@ -42,6 +42,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -117,8 +118,9 @@ class TypeFactoryTests {
         assertFalse(((PrimitiveAndWrapperType)baseType).isWrapper());
         Object primitiveArray = baseType.allocateArray(5);
         baseType.setArrayValue(primitiveArray, 0, primitiveValue);
-        baseType.getValue(primitiveValue);
+        Object value = baseType.getValue(primitiveValue);
         assertEquals(5, Array.getLength(primitiveArray));
+        assertNotNull(baseType.getCodeRepresentation("test", value));
     }
 
     private void testPrimitiveWrapper(String name) {

@@ -6,7 +6,7 @@
 
     <groupId>dev.ddtj</groupId>
     <artifactId>CLI</artifactId>
-    <version>0.0.4-SNAPSHOT</version>
+    <version>0.0.5-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>dev.ddtj</groupId>
             <artifactId>Common</artifactId>
-            <version>0.0.4-SNAPSHOT</version>
+            <version>0.0.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
