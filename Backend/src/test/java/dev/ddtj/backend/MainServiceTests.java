@@ -1,8 +1,11 @@
 package dev.ddtj.backend;
 
+import com.sun.jdi.ReferenceType;
 import dev.ddtj.backend.data.Invocation;
 import dev.ddtj.backend.data.ParentClass;
 import dev.ddtj.backend.data.ParentMethod;
+import dev.ddtj.backend.data.objectmodel.BaseType;
+import dev.ddtj.backend.data.objectmodel.ObjectType;
 import dev.ddtj.backend.dto.ClassDTO;
 import dev.ddtj.backend.dto.MethodDTO;
 import dev.ddtj.backend.dto.TestTimeDTO;
@@ -10,7 +13,10 @@ import dev.ddtj.backend.dto.VMDTO;
 import dev.ddtj.backend.javadebugger.ConnectSession;
 import dev.ddtj.backend.javadebugger.MonitoredSession;
 import dev.ddtj.backend.service.MainService;
+import dev.ddtj.backend.service.TestGenerator;
+import dev.ddtj.backend.web.GeneratorController;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
@@ -19,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.servlet.ModelAndView;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -48,8 +55,15 @@ class MainServiceTests {
         PARENT_METHOD.setName("ParentMethod");
         initLombok();
 
+        ReferenceType referenceType = ObjectTypeTests.createClass(Collections.emptyList(), Collections.emptyList());
+        PARENT_CLASS.setObjectType(ObjectType.create(referenceType));
         PARENT_METHOD.addInvocation(invocation);
-        PARENT_CLASS.setName("ParentClass");
+        PARENT_METHOD.setParameters(new BaseType[0]);
+        invocation.setId("test");
+        invocation.setThreadId(1);
+        invocation.setFields(new Object[0]);
+        invocation.setArguments(new Object[0]);
+        PARENT_CLASS.setName("parent_package.ParentClass");
         PARENT_CLASS.addMethod(PARENT_METHOD);
         mainService.connect(vmDTO);
         PARENT_METHOD.addInvocation(new Invocation());
@@ -69,6 +83,13 @@ class MainServiceTests {
 
         List<TestTimeDTO> testTimeDTOS = mainService.listInvocations(PARENT_CLASS.getName(), PARENT_METHOD.fullName());
         assertEquals(2, testTimeDTOS.size());
+
+        TestGenerator generator = mainService.generateTest(PARENT_CLASS.getName(), PARENT_METHOD.fullName(), "test");
+        assertNotNull(generator);
+
+        GeneratorController controller = new GeneratorController(mainService);
+        ModelAndView modelAndView = controller.generateTest(PARENT_CLASS.getName(), PARENT_METHOD.fullName(), "test");
+        assertNotNull(modelAndView);
     }
 
     private void initLombok() {

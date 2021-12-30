@@ -17,11 +17,15 @@
  */
 package dev.ddtj.backend;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.sun.jdi.AbsentInformationException;
+import com.sun.jdi.ArrayType;
 import com.sun.jdi.ClassNotLoadedException;
 import com.sun.jdi.Field;
 import com.sun.jdi.IntegerType;
 import com.sun.jdi.Method;
+import com.sun.jdi.PrimitiveType;
 import com.sun.jdi.ReferenceType;
 import dev.ddtj.backend.data.Invocation;
 import dev.ddtj.backend.data.ParentClass;
@@ -29,6 +33,7 @@ import dev.ddtj.backend.data.ParentMethod;
 import dev.ddtj.backend.data.objectmodel.BaseType;
 import dev.ddtj.backend.data.objectmodel.ObjectType;
 import dev.ddtj.backend.data.objectmodel.PrimitiveAndWrapperType;
+import dev.ddtj.backend.data.objectmodel.TypeFactory;
 import dev.ddtj.backend.service.TestGenerator;
 import dev.ddtj.backend.testdata.BasicApp;
 import java.util.ArrayList;
@@ -41,7 +46,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 @Log
@@ -71,7 +75,14 @@ class TestGeneratorTests {
         ParentMethod parentMethod = new ParentMethod();
         parentClass.addMethod(parentMethod);
         parentMethod.setParentClass(parentClass);
-        parentMethod.setParameters(new BaseType[] { PrimitiveAndWrapperType.INTEGER, PrimitiveAndWrapperType.INTEGER });
+
+        ArrayType arrayType = Mockito.mock(ArrayType.class);
+        PrimitiveType intType = Mockito.mock(PrimitiveType.class);
+        Mockito.when(intType.name()).thenReturn("int");
+        Mockito.when(arrayType.componentType()).thenReturn(intType);
+        Mockito.when(arrayType.name()).thenReturn("I[");
+
+        parentMethod.setParameters(new BaseType[] { PrimitiveAndWrapperType.INTEGER, TypeFactory.create(arrayType), TypeFactory.create(arrayType) });
         parentMethod.setName("test");
         parentMethod.setSignature("V()");
         parentMethod.setReturnType(PrimitiveAndWrapperType.VOID);
@@ -83,7 +94,7 @@ class TestGeneratorTests {
         invocation.setTime(System.currentTimeMillis() - 500);
         invocation.setEndTime(System.currentTimeMillis());
         invocation.setThreadId(1);
-        invocation.setArguments(new Object[] { 1, 2 });
+        invocation.setArguments(new Object[] { 1, new int[] { 2 },  new int[0]});
 
         List<Invocation> internalCalls = new ArrayList<>();
         TestGenerator testGenerator = new TestGenerator(parentClass, parentMethod, invocation, internalCalls);

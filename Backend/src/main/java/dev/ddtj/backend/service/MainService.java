@@ -105,6 +105,9 @@ public class MainService {
         ParentClass parentClass = session.getClass(className);
         ParentMethod parentMethod = parentClass.findMethod(method);
         Invocation invocation = parentMethod.findInvocation(testId);
+        if(invocation == null) {
+            return null;
+        }
 
         List<Invocation> internalCalls = session.getInvocationList(invocation.getThreadId()).stream()
                 .filter(i -> i.getTime() >= invocation.getTime() && i.getTime() <= invocation.getEndTime() && i != invocation)

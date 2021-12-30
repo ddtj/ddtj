@@ -272,7 +272,7 @@ public class ObjectType extends BaseType {
             return result;
         } else {
             // TODO: We might need to inject some values into the mock here
-            return List.of(shortName + " " + fieldName + " = Mockito.mock(" + shortName + ".class);");
+            return List.of(shortName + " " + fieldName + MOCKITO_MOCK + shortName + DOT_CLASS_SUFFIX);
         }
     }
 
