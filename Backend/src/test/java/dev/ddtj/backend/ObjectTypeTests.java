@@ -18,6 +18,7 @@
 package dev.ddtj.backend;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.sun.jdi.AbsentInformationException;
@@ -37,7 +38,9 @@ import dev.ddtj.backend.data.objectmodel.ObjectType;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -109,8 +112,16 @@ class ObjectTypeTests {
 
         assertEquals(2, settersType.getFieldValues(object).length);
 
+        Map<String, Object> fieldsMap = new HashMap<>();
+        fieldsMap.put("field1", 1);
+        fieldsMap.put("field2", 1);
+        assertNotNull(settersType.getCodePrefix("field1", fieldsMap));
+
         assertEquals("x", settersType.getCodeRepresentation("x", null));
         assertEquals("field1", settersType.getFieldName(0));
+
+        settersType.getSetterMethods();
+        assertNotNull(settersType.getField(0));
     }
 
     public static Field create(String name, Type type) throws ClassNotLoadedException {
