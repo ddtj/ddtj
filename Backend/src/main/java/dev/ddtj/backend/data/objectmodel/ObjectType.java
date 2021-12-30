@@ -220,8 +220,10 @@ public class ObjectType extends BaseType {
     public Object getValue(Value value) {
         Map<String, Object> fieldValues = new HashMap<>();
         ObjectReference objectReference = (ObjectReference) value;
+        ReferenceType referenceType = objectReference.referenceType();
         for(int iter = 0 ; iter < supportedFields.length ; iter++) {
-            Value v = objectReference.getValue(objectReference.referenceType().fieldByName(supportedFields[iter]));
+            Field field = referenceType.fieldByName(supportedFields[iter]);
+            Value v = objectReference.getValue(field);
             fieldValues.put(supportedFields[iter], fieldBaseTypes[iter].getValue(v));
         }
         fieldValues.put("class", getType());

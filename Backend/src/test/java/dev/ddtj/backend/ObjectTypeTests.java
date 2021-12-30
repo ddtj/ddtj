@@ -24,11 +24,14 @@ import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.ClassNotLoadedException;
 import com.sun.jdi.Field;
 import com.sun.jdi.IntegerType;
+import com.sun.jdi.IntegerValue;
 import com.sun.jdi.LocalVariable;
 import com.sun.jdi.Method;
+import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.StackFrame;
 import com.sun.jdi.Type;
+import com.sun.jdi.Value;
 import com.sun.jdi.VirtualMachine;
 import dev.ddtj.backend.data.objectmodel.ObjectType;
 import java.lang.reflect.Array;
@@ -76,6 +79,17 @@ class ObjectTypeTests {
         ObjectType settersType = ObjectType.create(type);
         assertEquals(ObjectType.CreationType.SETTERS, settersType.getCreationType());
         assertTrue(settersType.canObjectBeCreated());
+
+        ObjectReference object = Mockito.mock(ObjectReference.class);
+        ReferenceType objectType = Mockito.mock(ReferenceType.class);
+        IntegerValue value = Mockito.mock(IntegerValue.class);
+        Mockito.when(object.referenceType()).thenReturn(objectType);
+        Mockito.when(object.getValue(field1)).thenReturn(value);
+        Mockito.when(object.getValue(field2)).thenReturn(value);
+        Mockito.when(objectType.fieldByName("field1")).thenReturn(field1);
+        Mockito.when(objectType.fieldByName("field2")).thenReturn(field2);
+        Mockito.when(value.value()).thenReturn(1);
+        settersType.getValue(object);
 
         assertEquals(5, Array.getLength(settersType.allocateArray(5)));
 
