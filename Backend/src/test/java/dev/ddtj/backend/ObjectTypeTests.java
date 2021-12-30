@@ -80,6 +80,22 @@ class ObjectTypeTests {
         assertEquals(ObjectType.CreationType.SETTERS, settersType.getCreationType());
         assertTrue(settersType.canObjectBeCreated());
 
+        testGetValue(field1, field2, settersType);
+
+        assertEquals(5, Array.getLength(settersType.allocateArray(5)));
+
+        type = createClass(methods.subList(0, 1), fields);
+        assertEquals(ObjectType.CreationType.NO_VALID_CONSTRUCTOR, ObjectType.create(type).getCreationType());
+
+        methods = Arrays.asList(
+                create(integerType, "<init>", "void", "field1", "field2"));
+        type = createClass(methods, fields);
+        ObjectType constructorObjectType = ObjectType.create(type);
+        assertEquals(ObjectType.CreationType.CONSTRUCTOR_FACTORY, constructorObjectType.getCreationType());
+        testGetValue(field1, field2, constructorObjectType);
+    }
+
+    private void testGetValue(Field field1, Field field2, ObjectType settersType) {
         ObjectReference object = Mockito.mock(ObjectReference.class);
         ReferenceType objectType = Mockito.mock(ReferenceType.class);
         IntegerValue value = Mockito.mock(IntegerValue.class);
@@ -95,16 +111,6 @@ class ObjectTypeTests {
 
         assertEquals("x", settersType.getCodeRepresentation("x", null));
         assertEquals("field1", settersType.getFieldName(0));
-
-        assertEquals(5, Array.getLength(settersType.allocateArray(5)));
-
-        type = createClass(methods.subList(0, 1), fields);
-        assertEquals(ObjectType.CreationType.NO_VALID_CONSTRUCTOR, ObjectType.create(type).getCreationType());
-
-        methods = Arrays.asList(
-                create(integerType, "<init>", "void", "field1", "field2"));
-        type = createClass(methods, fields);
-        assertEquals(ObjectType.CreationType.CONSTRUCTOR_FACTORY, ObjectType.create(type).getCreationType());
     }
 
     public static Field create(String name, Type type) throws ClassNotLoadedException {
